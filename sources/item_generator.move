@@ -45,11 +45,19 @@ module nft_war::item_generator {
 
     // resource cab required 
 
-    entry fun init() {
-
+    entry fun init()<WarCoinType> {
+        let sender_addr = signer::address_of(sender);                
+        let (resource_signer, signer_cap) = account::create_resource_account(sender, x"01");    
+        token::initialize_token_store(&resource_signer);
+        if(!exists<ItemManager>(sender_addr)){            
+            move_to(sender, ItemManager {                
+                signer_cap,                
+            });
+        };
+        if(!coin::is_account_registered<WarCoinType>(signer::address_of(&resource_signer))){
+            coin::register<WarCoinType>(&resource_signer);
+        };
     }
-
-
 
     entry fun create_collection (
         sender: &signer,                
@@ -57,6 +65,8 @@ module nft_war::item_generator {
         ) {                                             
         token::create_collection(sender, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
     }
+    
+    // 90% success / 10 fail to mint
 
     entry fun mint_item (
         sender: &signer, token_name: String, royalty_points_numerator:u64, collection_uri:String, max_amount:u64, amount:u64

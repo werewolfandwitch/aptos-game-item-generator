@@ -68,7 +68,7 @@ module nft_war::item_materials {
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                max_amount, // 1 maximum for NFT 
+                max_amount, 
                 collection_uri,
                 creator_address, // royalty fee to                
                 FEE_DENOMINATOR,
