@@ -27,7 +27,29 @@ module nft_war::item_materials {
     const MATERIAL_F: vector<u8> = b"Phoenix Feather";
     const MATERIAL_G: vector<u8> = b"Moonstone Ore";
     const MATERIAL_H: vector<u8> = b"Enchanted Wood";
-    const MATERIAL_I: vector<u8> = b"Elemental Essence";    
+    const MATERIAL_I: vector<u8> = b"Elemental Essence";
+
+    //!! Item description
+
+    // Glimmering Crystals: These rare and radiant crystals are found deep within ancient caves. They emit a soft, enchanting glow and are a key ingredient in crafting powerful magical artifacts.
+
+    // Ethereal Essence: A ghostly substance that can only be collected from the spirits of ethereal beings. It possesses a faint shimmer and is often used in creating ethereal weapons or enchanted armor.
+
+    // Dragon Scale: The scales of mighty dragons, known for their durability and resistance to fire. Dragon scales are highly sought after for forging powerful armor and shields that provide exceptional protection against elemental attacks.
+
+    // Celestial Dust: A fine, shimmering powder collected from fallen stars. Celestial dust is imbued with celestial magic and can be used to enchant weapons and create celestial-themed jewelry.
+
+    // Essence of the Ancients: A rare substance extracted from ancient ruins or the remnants of ancient creatures. It contains potent magical energy and is often used in creating legendary artifacts or enhancing existing ones.
+
+    // Phoenix Feather: Feathers shed by phoenixes, mythical birds of fire and rebirth. These feathers possess incredible heat resistance and are used in crafting flame-resistant equipment or items that grant temporary fire-based abilities.
+
+    // Moonstone Ore: A precious gemstone that can only be mined during a full moon. Moonstone ore has lunar magic infused within it and is used to create enchanted jewelry or enhance magical staves.
+
+    // Enchanted Wood: Wood harvested from mystical forests inhabited by sentient trees. This wood retains magical properties and is ideal for crafting wands, bows, and staves.
+
+    // Kraken Ink: An ink harvested from the mighty krakens of the deep sea. It possesses a dark, iridescent sheen and is used in the creation of powerful spell scrolls or to inscribe protective runes.
+
+    // Elemental Essence: Essence drawn from the elemental planes. Each elemental essence (fire, water, earth, air) grants specific properties and can be used in alchemy or enchanting to imbue items with elemental attributes.    
     
     entry fun create_collection<CoinType> (
         sender: &signer,                
@@ -37,7 +59,7 @@ module nft_war::item_materials {
     }
 
     entry fun mint_item_material (
-        sender: &signer, token_name: String, royalty_points_numerator:u64, collection_uri:String, max_amount:u64, amount:u64
+        sender: &signer, token_name: String, royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
     ) {        
         let creator_address = signer::address_of(sender);        
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
@@ -45,7 +67,7 @@ module nft_war::item_materials {
                 sender,
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
-                string::utf8(COLLECTION_DESCRIPTION),
+                description,
                 max_amount, // 1 maximum for NFT 
                 collection_uri,
                 creator_address, // royalty fee to                
@@ -64,22 +86,3 @@ module nft_war::item_materials {
     }  
 }
 
-// Glimmering Crystals: These rare and radiant crystals are found deep within ancient caves. They emit a soft, enchanting glow and are a key ingredient in crafting powerful magical artifacts.
-
-// Ethereal Essence: A ghostly substance that can only be collected from the spirits of ethereal beings. It possesses a faint shimmer and is often used in creating ethereal weapons or enchanted armor.
-
-// Dragon Scale: The scales of mighty dragons, known for their durability and resistance to fire. Dragon scales are highly sought after for forging powerful armor and shields that provide exceptional protection against elemental attacks.
-
-// Celestial Dust: A fine, shimmering powder collected from fallen stars. Celestial dust is imbued with celestial magic and can be used to enchant weapons and create celestial-themed jewelry.
-
-// Essence of the Ancients: A rare substance extracted from ancient ruins or the remnants of ancient creatures. It contains potent magical energy and is often used in creating legendary artifacts or enhancing existing ones.
-
-// Phoenix Feather: Feathers shed by phoenixes, mythical birds of fire and rebirth. These feathers possess incredible heat resistance and are used in crafting flame-resistant equipment or items that grant temporary fire-based abilities.
-
-// Moonstone Ore: A precious gemstone that can only be mined during a full moon. Moonstone ore has lunar magic infused within it and is used to create enchanted jewelry or enhance magical staves.
-
-// Enchanted Wood: Wood harvested from mystical forests inhabited by sentient trees. This wood retains magical properties and is ideal for crafting wands, bows, and staves.
-
-// Kraken Ink: An ink harvested from the mighty krakens of the deep sea. It possesses a dark, iridescent sheen and is used in the creation of powerful spell scrolls or to inscribe protective runes.
-
-// Elemental Essence: Essence drawn from the elemental planes. Each elemental essence (fire, water, earth, air) grants specific properties and can be used in alchemy or enchanting to imbue items with elemental attributes.
