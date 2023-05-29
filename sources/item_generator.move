@@ -4,7 +4,7 @@ module nft_war::item_generator {
     use std::signer;    
     use std::string::{Self, String};    
     
-    use aptos_token::token::{Self};    
+    use aptos_token::token::{Self, TokenId};
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
@@ -23,9 +23,34 @@ module nft_war::item_generator {
     const MATERIAL_B: vector<u8> = b"Dawnbreaker Blade"; // sword
     const MATERIAL_C: vector<u8> = b"Seraphic Saber";  // sword
     const MATERIAL_D: vector<u8> = b"Phoenixfire Scepter";  // staff
-     
-    
-    
+
+
+    struct ItemManager has store, key {          
+        signer_cap: account::SignerCapability,                 
+    } 
+
+    struct ItemEvents has key {
+        token_minting_events: EventHandle<ItemMintedEvent>,        
+    }
+
+    struct ItemMintedEvent has drop, store {
+        minted_item: token::TokenId,
+        generated_time: u64
+    }
+
+    fun get_resource_account_cap(minter_address : address) : signer acquires WarGame {
+        let minter = borrow_global<WarGame>(minter_address);
+        account::create_signer_with_capability(&minter.signer_cap)
+    }    
+
+    // resource cab required 
+
+    entry fun init() {
+
+    }
+
+
+
     entry fun create_collection (
         sender: &signer,                
         collection_uri: String, maximum_supply: u64, mutate_setting: vector<bool>
@@ -59,11 +84,6 @@ module nft_war::item_generator {
         token::opt_in_direct_transfer(sender, true);
         token::direct_transfer(sender, sender, token_id, 1);        
     }
-
-    public fun synthesis () {
-
-    }
-
 
 }
 
