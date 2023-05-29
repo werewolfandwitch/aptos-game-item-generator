@@ -38,8 +38,8 @@ module nft_war::item_generator {
         generated_time: u64
     }
 
-    fun get_resource_account_cap(minter_address : address) : signer acquires WarGame {
-        let minter = borrow_global<WarGame>(minter_address);
+    fun get_resource_account_cap(minter_address : address) : signer acquires ItemManager {
+        let minter = borrow_global<ItemManager>(minter_address);
         account::create_signer_with_capability(&minter.signer_cap)
     }    
 
