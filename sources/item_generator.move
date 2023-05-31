@@ -120,6 +120,17 @@ module item_gen::item_generator {
         });
     }
 
+    fun check_recipe(sender: &signer, item_token_name: String, material_token_name_1:String, material_token_name_2:String) : bool acquires Recipes {
+        let creator_address = signer::address_of(sender);
+        let minter = borrow_global_mut<Recipes>(creator_address);
+        let recipe = table::borrow(&minter.recipes, item_token_name);
+        let contain1 = vector::contains(&recipe.composition, &material_token_name_1);
+        let contain2 = vector::contains(&recipe.composition, &material_token_name_2);
+        contain1 && contain2
+        // true
+        
+    }
+
     entry fun remove_recipe(
         sender: &signer, item_token_name: String
         )acquires Recipes  {   
@@ -164,8 +175,8 @@ module item_gen::item_generator {
         assert!(creator == @item_material_creator, ENOT_CREATOR);
         assert!(token_name_1 != token_name_2, ESAME_MATERIAL);
         
-        let token_id_1 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version);
-        let token_id_2 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version); 
+        // let token_id_1 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version);
+        // let token_id_2 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version); 
         // check is in recipe
         // Glimmering Crystals + Ethereal Essence
 
