@@ -1,10 +1,14 @@
 
-module nft_war::item_generator {    
+module item_gen::item_generator {        
     use std::bcs;
     use std::signer;    
     use std::string::{Self, String};    
-    
-    use aptos_token::token::{Self, TokenId};
+    use aptos_std::table::{Self, Table};  
+    use aptos_token::token::{Self}; 
+    use aptos_framework::coin;    
+    use aptos_framework::event::{Self, EventHandle};
+    use std::vector;
+    use aptos_framework::account;    
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
@@ -18,6 +22,7 @@ module nft_war::item_generator {
     const COLLECTION_DESCRIPTION:vector<u8> = b"these items can be equipped by characters in W&W";
 
     const ENOT_CREATOR:u64 = 1;
+    const ESAME_MATERIAL:u64 = 2;
 
     // property for game
 
@@ -51,9 +56,12 @@ module nft_war::item_generator {
     // Moonstone Ore + Kraken Ink = Tidecaller Pendant
     // Effect: By combining the lunar-infused moonstone ore with the dark, iridescent kraken ink, you craft the Tidecaller Pendant. This enchanted pendant allows the wearer to command the tides and manipulate water-based magic, granting them control over aquatic forces.
 
+    struct Recipes has key {
+        recipes: Table<String, ItemComposition> // <Name of Item, Item Composition>
+    }
 
-    struct Recipes has store, drop, copy {
-        recipes: vector<String, String>
+    struct ItemComposition has key, store,drop {
+        composition: vector<String>
     }
 
     struct ItemManager has store, key {          
@@ -74,7 +82,7 @@ module nft_war::item_generator {
         account::create_signer_with_capability(&minter.signer_cap)
     }    
     // resource cab required 
-    entry fun init()<WarCoinType> {
+    entry fun init<WarCoinType>(sender: &signer,) {
         let sender_addr = signer::address_of(sender);                
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"01");    
         token::initialize_token_store(&resource_signer);
@@ -83,6 +91,13 @@ module nft_war::item_generator {
                 signer_cap,                
             });
         };
+
+        if(!exists<Recipes>(sender_addr)){
+            move_to(sender, Recipes {
+                recipes: table::new()
+            });
+        };
+
         if(!coin::is_account_registered<WarCoinType>(signer::address_of(&resource_signer))){
             coin::register<WarCoinType>(&resource_signer);
         };
@@ -95,13 +110,22 @@ module nft_war::item_generator {
     }
 
     entry fun add_recipe (
-        sender: &signer, token_name_1: String, token_name_2:String, token_name_3:String
-        ) {                                                     
+        sender: &signer, item_token_name: String, material_token_name_1:String, material_token_name_2:String
+        ) acquires Recipes {
+        let creator_address = signer::address_of(sender);
+        let minter = borrow_global_mut<Recipes>(creator_address);
+        let values = vector<String>[ material_token_name_1, material_token_name_2];
+        table::add(&mut minter.recipes, item_token_name, ItemComposition {
+            composition: values
+        });
     }
 
-    entry fun remove_recipe (
-        sender: &signer, token_name_1: String, token_name_2:String, token_name_3:String
-        ) {                                                     
+    entry fun remove_recipe(
+        sender: &signer, item_token_name: String
+        )acquires Recipes  {   
+        let creator_address = signer::address_of(sender);
+        let minter = borrow_global_mut<Recipes>(creator_address);
+        table::remove(&mut minter.recipes, item_token_name);                                                 
     }
     
     // 50% success / 50% fail to mint
@@ -137,7 +161,8 @@ module nft_war::item_generator {
         sender: &signer, creator:address, token_name_1: String, property_version:u64, token_name_2: String
     ) {
         // check collection name and creator address
-        assert!(creator== @item_material_creator, ENOT_CREATOR);
+        assert!(creator == @item_material_creator, ENOT_CREATOR);
+        assert!(token_name_1 != token_name_2, ESAME_MATERIAL);
         
         let token_id_1 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version);
         let token_id_2 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version); 

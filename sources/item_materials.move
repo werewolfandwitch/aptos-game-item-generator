@@ -1,5 +1,5 @@
 
-module nft_war::item_materials {    
+module item_gen::item_materials {    
     use std::bcs;
     use std::signer;    
     use std::string::{Self, String};    

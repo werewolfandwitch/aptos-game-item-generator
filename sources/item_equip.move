@@ -1,13 +1,18 @@
 
-module nft_war::item_equip {    
+module item_gen::item_equip {   
+    use std::error; 
     use std::bcs;
     use std::signer;    
     use std::string::{Self, String};    
-    
+    use aptos_framework::account;    
     use aptos_token::token::{Self};    
+    use aptos_std::table::{Self, Table};  
+    use std::vector;
 
     // collection name / info
     const ITEM_COLLECTION_NAME:vector<u8> = b"W&W ITEM";    
+    const ECONTAIN:u64 = 1;
+    const ENOT_CONTAIN:u64 = 2;
     
     struct ACL has store, drop, copy {
         list: vector<address>
@@ -48,7 +53,7 @@ module nft_war::item_equip {
         auth_table: Table<address, bool> 
     }
 
-    entry fun init() {
+    entry fun init(sender: &signer) {
         let sender_addr = signer::address_of(sender);
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"01");    
         token::initialize_token_store(&resource_signer);

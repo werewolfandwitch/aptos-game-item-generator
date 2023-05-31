@@ -1,5 +1,5 @@
 
-module nft_war::utils {    
+module item_gen::utils {    
     use std::bcs;
     use std::string::{Self, String};
     use std::vector;    
