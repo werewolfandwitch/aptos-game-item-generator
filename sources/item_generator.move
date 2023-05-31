@@ -52,6 +52,10 @@ module nft_war::item_generator {
     // Effect: By combining the lunar-infused moonstone ore with the dark, iridescent kraken ink, you craft the Tidecaller Pendant. This enchanted pendant allows the wearer to command the tides and manipulate water-based magic, granting them control over aquatic forces.
 
 
+    struct Recipes has store, drop, copy {
+        recipes: vector<String, String>
+    }
+
     struct ItemManager has store, key {          
         signer_cap: account::SignerCapability,                 
     } 
@@ -88,6 +92,16 @@ module nft_war::item_generator {
         sender: &signer, collection_uri: String, maximum_supply: u64, mutate_setting: vector<bool>
         ) {                                             
         token::create_collection(sender, string::utf8(ITEM_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
+    }
+
+    entry fun add_recipe (
+        sender: &signer, token_name_1: String, token_name_2:String, token_name_3:String
+        ) {                                                     
+    }
+
+    entry fun remove_recipe (
+        sender: &signer, token_name_1: String, token_name_2:String, token_name_3:String
+        ) {                                                     
     }
     
     // 50% success / 50% fail to mint
@@ -127,12 +141,18 @@ module nft_war::item_generator {
         
         let token_id_1 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version);
         let token_id_2 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version); 
+        // check is in recipe
+        // Glimmering Crystals + Ethereal Essence
+
         token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version, 1);
         token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
+
+        // give new
 
         // string::utf8(ITEM_COLLECTION_NAME);
     }
     // swap_owner => This is for those who are already holding their items here. Ownership information should be changed when the transfrom happend
+    // vector<address>
     entry fun swap_owner(
         sender: &signer, token_name: String, new_collection_name:String, new_token_name:String
     ) {
