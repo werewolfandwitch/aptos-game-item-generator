@@ -28,7 +28,7 @@ module nft_war::item_materials {
     const MATERIAL_H: vector<u8> = b"Enchanted Wood";
     const MATERIAL_I: vector<u8> = b"Elemental Essence";
 
-    //!! Item description
+    //!! Item material description
 
     // Glimmering Crystals: These rare and radiant crystals are found deep within ancient caves. They emit a soft, enchanting glow and are a key ingredient in crafting powerful magical artifacts.
 

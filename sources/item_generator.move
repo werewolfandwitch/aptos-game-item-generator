@@ -17,6 +17,8 @@ module nft_war::item_generator {
     const ITEM_MATERIAL_COLLECTION_NAME:vector<u8> = b"W&W ITEM MATERIAL";
     const COLLECTION_DESCRIPTION:vector<u8> = b"these items can be equipped by characters in W&W";
 
+    const ENOT_CREATOR:u64 = 1;
+
     // property for game
 
     // Glimmering Crystals + Ethereal Essence = Radiant Spiritstone
@@ -88,13 +90,13 @@ module nft_war::item_generator {
         token::create_collection(sender, string::utf8(ITEM_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
     }
     
-    // 50% success / 50 fail to mint
+    // 50% success / 50% fail to mint
     // item synthesis
     fun mint_item (
         sender: &signer, token_name: String, royalty_points_numerator:u64, collection_uri:String, max_amount:u64, amount:u64
     ) {        
         let creator_address = signer::address_of(sender);        
-        let mutability_config = &vector<bool>[ true, true, false, true, true ];              
+        let mutability_config = &vector<bool>[ false, true, true, true, true ];
         let token_data_id = token::create_tokendata(
                 sender,
                 string::utf8(ITEM_COLLECTION_NAME),
@@ -108,9 +110,9 @@ module nft_war::item_generator {
                 // we don't allow any mutation to the token
                 token::create_token_mutability_config(mutability_config),
                 // type
-                vector<String>[string::utf8(BURNABLE_BY_OWNER),string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
-                vector<vector<u8>>[bcs::to_bytes<bool>(&true),bcs::to_bytes<bool>(&false)],  // values 
-                vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
+                vector<String>[string::utf8(BURNABLE_BY_OWNER),string::utf8(BURNABLE_BY_CREATOR), string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
+                vector<vector<u8>>[bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&false)],  // values 
+                vector<String>[string::utf8(b"bool"),string::utf8(b"bool"), string::utf8(b"bool")],
         );
         let token_id = token::mint_token(sender, token_data_id, amount);
         token::opt_in_direct_transfer(sender, true);
@@ -118,11 +120,19 @@ module nft_war::item_generator {
     }
     // synthesis => item systhesys by item recicpe    
     entry fun synthesis_two_item(
-        sender: &signer, token_name_1: String, token_name_2: String,
+        sender: &signer, creator:address, token_name_1: String, property_version:u64, token_name_2: String
     ) {
+        // check collection name and creator address
+        assert!(creator== @item_material_creator, ENOT_CREATOR);
+        
+        let token_id_1 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version);
+        let token_id_2 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version); 
+        token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version, 1);
+        token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
 
+        // string::utf8(ITEM_COLLECTION_NAME);
     }
-    // swap_owner => This is for those who are already holding their items here. Ownership information should be changed
+    // swap_owner => This is for those who are already holding their items here. Ownership information should be changed when the transfrom happend
     entry fun swap_owner(
         sender: &signer, token_name: String, new_collection_name:String, new_token_name:String
     ) {
