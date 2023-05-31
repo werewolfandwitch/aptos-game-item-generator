@@ -23,6 +23,7 @@ module item_gen::item_generator {
 
     const ENOT_CREATOR:u64 = 1;
     const ESAME_MATERIAL:u64 = 2;
+    const ENOT_IN_RECIPE:u64 = 3;
 
     // property for game
 
@@ -127,7 +128,6 @@ module item_gen::item_generator {
         let contain1 = vector::contains(&recipe.composition, &material_token_name_1);
         let contain2 = vector::contains(&recipe.composition, &material_token_name_2);
         contain1 && contain2
-        // true
         
     }
 
@@ -169,7 +169,7 @@ module item_gen::item_generator {
     }
     // synthesis => item systhesys by item recicpe    
     entry fun synthesis_two_item(
-        sender: &signer, creator:address, token_name_1: String, property_version:u64, token_name_2: String
+        sender: &signer, creator:address, target_item:String, token_name_1: String, property_version:u64, token_name_2: String
     ) {
         // check collection name and creator address
         assert!(creator == @item_material_creator, ENOT_CREATOR);
@@ -179,7 +179,7 @@ module item_gen::item_generator {
         // let token_id_2 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version); 
         // check is in recipe
         // Glimmering Crystals + Ethereal Essence
-
+        assert!(check_recipe(sender,target_item, token_name_1, token_name_2),ENOT_IN_RECIPE);
         token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version, 1);
         token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
 
