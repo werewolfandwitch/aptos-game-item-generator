@@ -9,6 +9,7 @@ AptosToken = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="apt
 
 [addresses]
 item_generator ="_"
+item_material_creator ="_"
 war_coin="0x52ab49a4039c3d2b0aa6e0a00aaed75dcff72a3120ba3610f62d1d0b6032345a"
 aptos_coin="0x1"
 aptos_framework="0x1"

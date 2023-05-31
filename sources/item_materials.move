@@ -11,7 +11,6 @@ module nft_war::item_materials {
     const TOKEN_PROPERTY_MUTABLE: vector<u8> = b"TOKEN_PROPERTY_MUTATBLE";    
 
     const FEE_DENOMINATOR: u64 = 100000;
-    
 
     // collection name / info
     const ITEM_MATERIAL_COLLECTION_NAME:vector<u8> = b"W&W ITEM MATERIAL";

@@ -12,17 +12,42 @@ module nft_war::item_generator {
 
     const FEE_DENOMINATOR: u64 = 100000;
     
-
     // collection name / info
-    const ITEM_MATERIAL_COLLECTION_NAME:vector<u8> = b"W&W ITEM";
-    const COLLECTION_DESCRIPTION:vector<u8> = b"these weapons can be equipped by characters in W&W";
+    const ITEM_COLLECTION_NAME:vector<u8> = b"W&W ITEM";
+    const ITEM_MATERIAL_COLLECTION_NAME:vector<u8> = b"W&W ITEM MATERIAL";
+    const COLLECTION_DESCRIPTION:vector<u8> = b"these items can be equipped by characters in W&W";
 
     // property for game
 
-    const MATERIAL_A: vector<u8> = b"Arcane Emberstaff"; // staff
-    const MATERIAL_B: vector<u8> = b"Dawnbreaker Blade"; // sword
-    const MATERIAL_C: vector<u8> = b"Seraphic Saber";  // sword
-    const MATERIAL_D: vector<u8> = b"Phoenixfire Scepter";  // staff
+    // Glimmering Crystals + Ethereal Essence = Radiant Spiritstone
+    // Effect: By combining the radiant crystals with the ethereal essence, you create a Spiritstone that harnesses the power of ethereal beings. This enchanted stone can be used to augment magical weapons or create ethereal armor.
+
+    // Glimmering Crystals + Celestial Dust = Radiant Celestite
+    // Effect: By combining the radiant crystals with celestial dust, you create Radiant Celestite. This gemstone radiates celestial magic and can be used to imbue weapons with enhanced celestial properties or create powerful celestial-themed artifacts.
+
+    // Dragon Scale + Celestial Dust = Celestial Dragon Scale
+    // Effect: By infusing the mighty dragon scales with celestial dust, you forge a Celestial Dragon Scale. This rare material possesses exceptional resistance to both physical and magical attacks, granting the wearer enhanced protection against elemental forces.
+
+    // Dragon Scale + Elemental Essence (Fire) = Inferno Scale Armor
+    // Effect: By infusing the mighty dragon scales with the fiery elemental essence, you forge Inferno Scale Armor. This legendary armor provides exceptional protection against fire-based attacks and grants the wearer the ability to unleash powerful flames in combat.
+
+    // Essence of the Ancients + Phoenix Feather = Phoenix's Elixir
+    // Effect: By combining the ancient essence with the heat-resistant phoenix feathers, you create a potent elixir known as Phoenix's Elixir. This elixir grants temporary fire-based abilities to the user, enhancing their strength and resilience.
+
+    // Moonstone Ore + Enchanted Wood = Lunar Enchanted Talisman
+    // Effect: By combining the lunar-infused gemstone with enchanted wood, you craft a Lunar Enchanted Talisman. This mystical talisman enhances the wielder's magical abilities, granting them increased spellcasting prowess and the ability to channel lunar energy.
+
+    // Kraken Ink + Elemental Essence (Water) = Ink of the Deep Seas
+    // Effect: By blending the dark, iridescent kraken ink with water elemental essence, you create the Ink of the Deep Seas. This ink is used to inscribe protective runes or create powerful spell scrolls with water-based enchantments, providing the user with aquatic powers.
+
+    // Ethereal Essence + Essence of the Ancients = Spectral Essence
+    // Effect: By blending the ghostly ethereal essence with the potent Essence of the Ancients, you obtain Spectral Essence. This essence contains a combination of ethereal and ancient energies, making it a versatile substance for crafting artifacts that harness spectral powers or enhance magical abilities.
+
+    // Phoenix Feather + Enchanted Wood = Flameheart Bow
+    // Effect: By combining the heat-resistant phoenix feathers with enchanted wood, you create the Flameheart Bow. This enchanted bow channels the essence of fire, imbuing arrows with fiery properties and granting the archer enhanced precision and power in dealing with fire-aligned foes.
+
+    // Moonstone Ore + Kraken Ink = Tidecaller Pendant
+    // Effect: By combining the lunar-infused moonstone ore with the dark, iridescent kraken ink, you craft the Tidecaller Pendant. This enchanted pendant allows the wearer to command the tides and manipulate water-based magic, granting them control over aquatic forces.
 
 
     struct ItemManager has store, key {          
@@ -42,9 +67,7 @@ module nft_war::item_generator {
         let minter = borrow_global<ItemManager>(minter_address);
         account::create_signer_with_capability(&minter.signer_cap)
     }    
-
     // resource cab required 
-
     entry fun init()<WarCoinType> {
         let sender_addr = signer::address_of(sender);                
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"01");    
@@ -60,22 +83,21 @@ module nft_war::item_generator {
     }
 
     entry fun create_collection (
-        sender: &signer,                
-        collection_uri: String, maximum_supply: u64, mutate_setting: vector<bool>
+        sender: &signer, collection_uri: String, maximum_supply: u64, mutate_setting: vector<bool>
         ) {                                             
-        token::create_collection(sender, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
+        token::create_collection(sender, string::utf8(ITEM_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
     }
     
-    // 90% success / 10 fail to mint
-
-    entry fun mint_item (
+    // 50% success / 50 fail to mint
+    // item synthesis
+    fun mint_item (
         sender: &signer, token_name: String, royalty_points_numerator:u64, collection_uri:String, max_amount:u64, amount:u64
     ) {        
         let creator_address = signer::address_of(sender);        
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
         let token_data_id = token::create_tokendata(
                 sender,
-                string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
+                string::utf8(ITEM_COLLECTION_NAME),
                 token_name,
                 string::utf8(COLLECTION_DESCRIPTION),
                 max_amount, // 1 maximum for NFT 
@@ -94,6 +116,17 @@ module nft_war::item_generator {
         token::opt_in_direct_transfer(sender, true);
         token::direct_transfer(sender, sender, token_id, 1);        
     }
+    // synthesis => item systhesys by item recicpe    
+    entry fun synthesis_two_item(
+        sender: &signer, token_name_1: String, token_name_2: String,
+    ) {
+
+    }
+    // swap_owner => This is for those who are already holding their items here. Ownership information should be changed
+    entry fun swap_owner(
+        sender: &signer, token_name: String, new_collection_name:String, new_token_name:String
+    ) {
+        // check ownership by sender address sender should be holder of character token 
+    }    
 
 }
-
