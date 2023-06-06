@@ -1,5 +1,5 @@
 [package]
-name = "wolf_witch_item_generator"
+name = "werewolf_witch_item_gen"
 version = "0.0.1"
 
 [dependencies]

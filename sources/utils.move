@@ -6,7 +6,6 @@ module item_gen::utils {
     use aptos_std::from_bcs;
     use std::hash;
 
-    // use aptos_framework::block;
     use aptos_framework::transaction_context;
     use aptos_framework::timestamp;
     use aptos_token::token::{Self, TokenId, TokenDataId};

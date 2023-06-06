@@ -3,12 +3,14 @@ module item_gen::item_generator {
     use std::bcs;
     use std::signer;    
     use std::string::{Self, String};    
+    use std::option::{Self};
     use aptos_std::table::{Self, Table};  
     use aptos_token::token::{Self}; 
     use aptos_framework::coin;    
     use aptos_framework::event::{Self, EventHandle};
     use std::vector;
     use aptos_framework::account;    
+    use item_gen::utils;
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
@@ -121,56 +123,69 @@ module item_gen::item_generator {
         });
     }
 
-    fun check_recipe(sender: &signer, item_token_name: String, material_token_name_1:String, material_token_name_2:String) : bool acquires Recipes {
-        let creator_address = signer::address_of(sender);
+    fun check_recipe(creator_address: address, item_token_name: String, material_token_name_1:String, material_token_name_2:String) : bool acquires Recipes {        
         let minter = borrow_global_mut<Recipes>(creator_address);
         let recipe = table::borrow(&minter.recipes, item_token_name);
         let contain1 = vector::contains(&recipe.composition, &material_token_name_1);
         let contain2 = vector::contains(&recipe.composition, &material_token_name_2);
-        contain1 && contain2
-        
+        contain1 && contain2        
     }
 
     entry fun remove_recipe(
         sender: &signer, item_token_name: String
         )acquires Recipes  {   
         let creator_address = signer::address_of(sender);
-        let minter = borrow_global_mut<Recipes>(creator_address);
-        table::remove(&mut minter.recipes, item_token_name);                                                 
+        let recipes = borrow_global_mut<Recipes>(creator_address);
+        table::remove(&mut recipes.recipes, item_token_name);                                                 
     }
     
     // 50% success / 50% fail to mint
-    // item synthesis
+    // item synthesis for test item. not for pulbic
     fun mint_item (
-        sender: &signer, token_name: String, royalty_points_numerator:u64, collection_uri:String, max_amount:u64, amount:u64
+        sender: &signer, token_name: String
     ) {        
         let creator_address = signer::address_of(sender);        
         let mutability_config = &vector<bool>[ false, true, true, true, true ];
+        let collection_uri = b"https://"; // TODO URI should be filled 
+        let supply_count = &mut token::get_collection_supply(creator_address, string::utf8(ITEM_COLLECTION_NAME));        
+        let new_supply = option::extract<u64>(supply_count);                        
+        let i = 0;
+        while (i <= new_supply) {
+            let new_token_name = token_name;                
+            string::append_utf8(&mut new_token_name, b" #");
+            let count_string = utils::to_string((i as u128));
+            string::append(&mut new_token_name, count_string);                                
+            if(!token::check_tokendata_exists(creator_address, string::utf8(ITEM_COLLECTION_NAME), new_token_name)) {
+                token_name = new_token_name;                
+                break
+            };
+            i = i + 1;
+        };                                               
         let token_data_id = token::create_tokendata(
                 sender,
                 string::utf8(ITEM_COLLECTION_NAME),
                 token_name,
                 string::utf8(COLLECTION_DESCRIPTION),
-                max_amount, // 1 maximum for NFT 
-                collection_uri,
+                1, // 1 maximum for NFT 
+                string::utf8(collection_uri), // TODO:: should be changed by token name
                 creator_address, // royalty fee to                
                 FEE_DENOMINATOR,
-                royalty_points_numerator,
+                FEE_DENOMINATOR * 100, // TODO:: should be check later::royalty_points_numerator
                 // we don't allow any mutation to the token
                 token::create_token_mutability_config(mutability_config),
                 // type
-                vector<String>[string::utf8(BURNABLE_BY_OWNER),string::utf8(BURNABLE_BY_CREATOR), string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
+                vector<String>[string::utf8(BURNABLE_BY_OWNER), string::utf8(BURNABLE_BY_CREATOR), string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
                 vector<vector<u8>>[bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&false)],  // values 
                 vector<String>[string::utf8(b"bool"),string::utf8(b"bool"), string::utf8(b"bool")],
         );
-        let token_id = token::mint_token(sender, token_data_id, amount);
+        let token_id = token::mint_token(sender, token_data_id, 1);
         token::opt_in_direct_transfer(sender, true);
         token::direct_transfer(sender, sender, token_id, 1);        
     }
     // synthesis => item systhesys by item recicpe    
     entry fun synthesis_two_item(
-        sender: &signer, creator:address, target_item:String, token_name_1: String, property_version:u64, token_name_2: String
-    ) {
+        sender: &signer, creator:address, target_item:String, token_name_1: String, token_name_2: String, property_version:u64
+    ) acquires Recipes {
         // check collection name and creator address
         assert!(creator == @item_material_creator, ENOT_CREATOR);
         assert!(token_name_1 != token_name_2, ESAME_MATERIAL);
@@ -179,10 +194,13 @@ module item_gen::item_generator {
         // let token_id_2 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version); 
         // check is in recipe
         // Glimmering Crystals + Ethereal Essence
-        assert!(check_recipe(sender,target_item, token_name_1, token_name_2),ENOT_IN_RECIPE);
+        assert!(check_recipe(creator,target_item, token_name_1, token_name_2),ENOT_IN_RECIPE);
         token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version, 1);
         token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
-
+        
+        mint_item(sender, target_item);
+        // create new
+        
         // give new
 
         // string::utf8(ITEM_COLLECTION_NAME);
