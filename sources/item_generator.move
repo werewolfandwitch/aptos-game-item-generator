@@ -13,7 +13,6 @@ module item_gen::item_generator {
     use item_gen::utils;
     use item_gen::acl::{Self, ACL};
 
-
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
     const TOKEN_PROPERTY_MUTABLE: vector<u8> = b"TOKEN_PROPERTY_MUTATBLE";    
@@ -196,7 +195,7 @@ module item_gen::item_generator {
                 token::create_token_mutability_config(mutability_config),
                 // type
                 vector<String>[string::utf8(BURNABLE_BY_OWNER), string::utf8(BURNABLE_BY_CREATOR), string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
-                vector<vector<u8>>[bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&false)],  // values 
+                vector<vector<u8>>[bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true)],  // values 
                 vector<String>[string::utf8(b"bool"),string::utf8(b"bool"), string::utf8(b"bool")],
         );
         let token_id = token::mint_token(&resource_signer, token_data_id, 1);
