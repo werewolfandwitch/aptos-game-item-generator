@@ -11,6 +11,7 @@ module item_gen::item_generator {
     use std::vector;
     use aptos_framework::account;    
     use item_gen::utils;
+    use item_gen::acl::{Self, ACL};
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
@@ -68,7 +69,8 @@ module item_gen::item_generator {
     }
 
     struct ItemManager has store, key {          
-        signer_cap: account::SignerCapability,                 
+        signer_cap: account::SignerCapability,
+        acl: acl::ACL                                   
     } 
 
     struct ItemEvents has key {
@@ -91,7 +93,8 @@ module item_gen::item_generator {
         token::initialize_token_store(&resource_signer);
         if(!exists<ItemManager>(sender_addr)){            
             move_to(sender, ItemManager {                
-                signer_cap,                
+                signer_cap,  
+                acl: acl::empty()                             
             });
         };
 

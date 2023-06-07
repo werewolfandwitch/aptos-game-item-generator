@@ -7,9 +7,9 @@ module item_gen::item_equip {
     use aptos_framework::account;    
     use aptos_token::token::{Self};    
     use aptos_std::table::{Self, Table};  
-    use std::vector;
+    use std::vector;    
 
-    use item_gen::acl;
+    use item_gen::acl::{Self, ACL};
 
     // collection name / info
     const ITEM_COLLECTION_NAME:vector<u8> = b"W&W ITEM";    
@@ -17,19 +17,18 @@ module item_gen::item_equip {
     const ENOT_CONTAIN:u64 = 2;
     
     struct ItemHolder has store, key {          
-        signer_cap: account::SignerCapability,                 
-    }
-    struct AuthorizedAddress has key {
-        auth_table: Table<address, bool> 
-    }
+        signer_cap: account::SignerCapability,
+        acl: acl::ACL                  
+    }    
 
     entry fun init(sender: &signer) {
         let sender_addr = signer::address_of(sender);
-        let (resource_signer, signer_cap) = account::create_resource_account(sender, x"01");    
+        let (resource_signer, signer_cap) = account::create_resource_account(sender, x"03");    
         token::initialize_token_store(&resource_signer);
         if(!exists<ItemHolder>(sender_addr)){            
             move_to(sender, ItemHolder {                
-                signer_cap,                
+                signer_cap,
+                acl: acl::empty()               
             });
         };        
     }
@@ -45,14 +44,16 @@ module item_gen::item_equip {
     // sender address should be season contract address for authorization
     entry fun item_equip (
         sender: &signer,token_name: String, description:String, collection:String
-        ) {                                                     
+        ) { 
+        // acl required
     }
-    // remove claim receipt and give back to sender item
-    // sender address should be season contract address for authorization
-    entry fun item_unequip (
+
+    public fun item_unequip (
         sender: &signer, token_name: String, description:String,
     ) {                     
+        // acl required
     }
+        
     // swap_owner => This is for those who are already holding their items here. Ownership information should be changed when the transfrom happend
     // vector<address>
     entry fun swap_owner(

@@ -4,7 +4,8 @@ module item_gen::item_materials {
     use std::signer;    
     use std::string::{Self, String};    
     use aptos_framework::account;    
-    use aptos_token::token::{Self};    
+    use aptos_token::token::{Self};
+    use item_gen::acl::{Self, ACL};    
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
@@ -52,6 +53,7 @@ module item_gen::item_materials {
 
     struct ItemMaterialManager has store, key {          
         signer_cap: account::SignerCapability,                 
+        acl: acl::ACL
     } 
 
     fun get_resource_account_cap(minter_address : address) : signer acquires ItemMaterialManager {
@@ -65,7 +67,8 @@ module item_gen::item_materials {
         token::initialize_token_store(&resource_signer);
         if(!exists<ItemMaterialManager>(sender_addr)){            
             move_to(sender, ItemMaterialManager {                
-                signer_cap,                
+                signer_cap,  
+                acl: acl::empty()                             
             });
         };        
         
@@ -104,38 +107,38 @@ module item_gen::item_materials {
         token::direct_transfer(&resource_signer, sender, token_id, 1);        
     }
 
-    public fun mint_item_material (
-        sender: &signer, 
-        minter_address:address, 
-        token_name: String, 
-        royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
-    ) acquires ItemMaterialManager {        
-        // TODO should check ACL    
-        // must called by W&W contract.
-        let resource_signer = get_resource_account_cap(minter_address);                
-        let resource_account_address = signer::address_of(&resource_signer);        
-        let creator_address = signer::address_of(sender);        
-        let mutability_config = &vector<bool>[ true, true, false, true, true ];              
-        let token_data_id = token::create_tokendata(
-                &resource_signer,
-                string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
-                token_name,
-                description,
-                max_amount, // 1 for NFT
-                collection_uri,
-                creator_address, // royalty fee to                
-                FEE_DENOMINATOR,
-                royalty_points_numerator,
-                // we don't allow any mutation to the token
-                token::create_token_mutability_config(mutability_config),
-                // type
-                vector<String>[string::utf8(BURNABLE_BY_OWNER),string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
-                vector<vector<u8>>[bcs::to_bytes<bool>(&true),bcs::to_bytes<bool>(&false)],  // values 
-                vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
-        );
-        let token_id = token::mint_token(&resource_signer, token_data_id, amount);
-        token::opt_in_direct_transfer(sender, true);
-        token::direct_transfer(&resource_signer, sender, token_id, 1);        
-    }  
+    // public fun mint_item_material (
+    //     sender: &signer, 
+    //     minter_address:address, 
+    //     token_name: String, 
+    //     royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
+    // ) acquires ItemMaterialManager {        
+    //     // TODO should check ACL    
+    //     // must called by W&W contract.
+    //     let resource_signer = get_resource_account_cap(minter_address);                
+    //     let resource_account_address = signer::address_of(&resource_signer);        
+    //     let creator_address = signer::address_of(sender);        
+    //     let mutability_config = &vector<bool>[ true, true, false, true, true ];              
+    //     let token_data_id = token::create_tokendata(
+    //             &resource_signer,
+    //             string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
+    //             token_name,
+    //             description,
+    //             max_amount, // 1 for NFT
+    //             collection_uri,
+    //             creator_address, // royalty fee to                
+    //             FEE_DENOMINATOR,
+    //             royalty_points_numerator,
+    //             // we don't allow any mutation to the token
+    //             token::create_token_mutability_config(mutability_config),
+    //             // type
+    //             vector<String>[string::utf8(BURNABLE_BY_OWNER),string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
+    //             vector<vector<u8>>[bcs::to_bytes<bool>(&true),bcs::to_bytes<bool>(&false)],  // values 
+    //             vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
+    //     );
+    //     let token_id = token::mint_token(&resource_signer, token_data_id, amount);
+    //     token::opt_in_direct_transfer(sender, true);
+    //     token::direct_transfer(&resource_signer, sender, token_id, 1);        
+    // }  
 }
 
