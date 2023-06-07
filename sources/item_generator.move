@@ -143,7 +143,7 @@ module item_gen::item_generator {
     }
 
     fun check_recipe(creator_address: address, item_token_name: String, material_token_name_1:String, material_token_name_2:String) : bool acquires Recipes {        
-        let minter = borrow_global_mut<Recipes>(creator_address);
+        let minter = borrow_global<Recipes>(creator_address);
         let recipe = table::borrow(&minter.recipes, item_token_name);
         let contain1 = vector::contains(&recipe.composition, &material_token_name_1);
         let contain2 = vector::contains(&recipe.composition, &material_token_name_2);
