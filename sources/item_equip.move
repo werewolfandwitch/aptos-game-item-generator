@@ -150,8 +150,8 @@ module item_gen::item_equip {
         });        
     }
         
-    // swap_owner => This is for those who are already holding their items here. Ownership information should be changed when the transfrom happend
-    // vector<address>
+    // TODO should be changeg to public function
+    // public fun swap_owner(
     entry fun swap_owner(
         sender: &signer, contract_address:address,
         fighter_token_name: String, fighter_collectin_name:String, fighter_creator:address,
