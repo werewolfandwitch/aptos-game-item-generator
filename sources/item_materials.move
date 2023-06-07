@@ -122,12 +122,14 @@ module item_gen::item_materials {
         collection_uri:String, max_amount:u64, amount:u64
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);
-        let manager = borrow_global<ItemMaterialManager>(sender_address);             
-        acl::assert_contains(&manager.acl,sender_address);
         let resource_signer = get_resource_account_cap(minter_address);                
-        
-        let mutability_config = &vector<bool>[ true, true, false, true, true ];              
-        let token_data_id = token::create_tokendata(
+        let resource_account_address = signer::address_of(&resource_signer);     
+        let manager = borrow_global<ItemMaterialManager>(sender_address);             
+        acl::assert_contains(&manager.acl,sender_address);                
+        let mutability_config = &vector<bool>[ true, true, false, true, true ];        
+        let token_data_id;
+        if(!token::check_tokendata_exists(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name)) {
+            token_data_id = token::create_tokendata(
                 &resource_signer,
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
@@ -143,7 +145,10 @@ module item_gen::item_materials {
                 vector<String>[string::utf8(BURNABLE_BY_OWNER),string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
                 vector<vector<u8>>[bcs::to_bytes<bool>(&true),bcs::to_bytes<bool>(&false)],  // values 
                 vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
-        );
+            );            
+        } else {
+            token_data_id = token::create_token_data_id(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME),token_name);                    
+        };                     
         let token_id = token::mint_token(&resource_signer, token_data_id, amount);
         token::opt_in_direct_transfer(sender, true);
         token::direct_transfer(&resource_signer, sender, token_id, amount);        
