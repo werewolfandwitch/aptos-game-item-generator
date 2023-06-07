@@ -172,17 +172,17 @@ module item_gen::item_generator {
         contain1 && contain2        
     }
 
-    entry fun check_recipe_entry(creator_address: address, item_token_name: String, material_token_name_1:String, material_token_name_2:String) acquires Recipes {        
-        let minter = borrow_global_mut<Recipes>(creator_address);
-        let recipe = table::borrow(&minter.recipes, item_token_name);
-        let contain1 = vector::contains(&recipe.composition, &material_token_name_1);
-        let contain2 = vector::contains(&recipe.composition, &material_token_name_2);
-        event::emit_event(&mut minter.recipe_check_events, ItemRecipeCheck { 
-            material_1: contain1,        
-            material_2: contain2,
-            item: item_token_name,            
-        });        
-    }
+    // entry fun check_recipe_entry(creator_address: address, item_token_name: String, material_token_name_1:String, material_token_name_2:String) acquires Recipes {        
+    //     let minter = borrow_global_mut<Recipes>(creator_address);
+    //     let recipe = table::borrow(&minter.recipes, item_token_name);
+    //     let contain1 = vector::contains(&recipe.composition, &material_token_name_1);
+    //     let contain2 = vector::contains(&recipe.composition, &material_token_name_2);
+    //     event::emit_event(&mut minter.recipe_check_events, ItemRecipeCheck { 
+    //         material_1: contain1,        
+    //         material_2: contain2,
+    //         item: item_token_name,            
+    //     });        
+    // }
 
     entry fun remove_recipe(
         sender: &signer, item_token_name: String
@@ -246,7 +246,7 @@ module item_gen::item_generator {
                 
         // check is in recipe
         // Glimmering Crystals + Ethereal Essence
-        assert!(check_recipe(item_material_creator, target_item, token_name_1, token_name_2), ENOT_IN_RECIPE);
+        assert!(check_recipe(minter_address, target_item, token_name_1, token_name_2), ENOT_IN_RECIPE);
         token::burn(sender, item_material_creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version, 1);
         token::burn(sender, item_material_creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
         
