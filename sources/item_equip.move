@@ -8,6 +8,7 @@ module item_gen::item_equip {
     use aptos_token::token::{Self};    
     use aptos_std::table::{Self, Table};  
     use std::vector;    
+    use aptos_framework::coin;
 
     use item_gen::acl::{Self, ACL};
 
@@ -43,6 +44,13 @@ module item_gen::item_equip {
         collectin_name:String,
         item_creator:address
     }
+    
+    entry fun admin_withdraw<CoinType>(sender: &signer, amount: u64) acquires ItemHolder {
+        let sender_addr = signer::address_of(sender);
+        let resource_signer = get_resource_account_cap(sender_addr);                                
+        let coins = coin::withdraw<CoinType>(&resource_signer, amount);                
+        coin::deposit(sender_addr, coins);
+    }
 
     fun get_resource_account_cap(minter_address : address) : signer acquires ItemHolder {
         let minter = borrow_global<ItemHolder>(minter_address);
@@ -69,30 +77,25 @@ module item_gen::item_equip {
         let acl = manager.acl;        
         acl::add(&mut acl, sender_addr);
     }
-
-    entry fun add_auth() {
-        // upsert table true with address. give authorized
-    }
-
-    entry fun remove_auth() {
-        // upsert table false with address. remove authorized
-    }
+    
     // keep item in resource account with claim receipt
     // sender address should be season contract address for authorization
     entry fun item_equip (
         sender: &signer,token_name: String, description:String, collection:String
-        ) { 
-        // acl required
+    ) acquires ItemHolder {
+        let sender_address = signer::address_of(sender);     
+        assert!(is_in_acl(sender_address), ENOT_IN_ACL);        
         // create a ItemReciept
         // emit equip item
     }
 
     public fun item_unequip (
         sender: &signer, token_name: String, description:String,
-    ) {                     
-        // acl required
-        // emit unequip item        
+    ) acquires ItemHolder {
+        let sender_address = signer::address_of(sender);     
+        assert!(is_in_acl(sender_address), ENOT_IN_ACL);                     
         // remove a ItemReciept
+        // emit unequip item   
     }
         
     // swap_owner => This is for those who are already holding their items here. Ownership information should be changed when the transfrom happend
@@ -101,7 +104,9 @@ module item_gen::item_equip {
         sender: &signer, token_name: String, 
         new_collection_name:String, // werewolf and witch collection name
         new_token_name:String // 
-    ) {
+    ) acquires ItemHolder {
+        let sender_address = signer::address_of(sender);     
+        assert!(is_in_acl(sender_address), ENOT_IN_ACL); 
         // check ownership by sender address sender should be holder of character token 
     }  
 }

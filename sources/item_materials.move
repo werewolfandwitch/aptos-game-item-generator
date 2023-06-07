@@ -6,6 +6,7 @@ module item_gen::item_materials {
     use aptos_framework::account;    
     use aptos_token::token::{Self};
     use item_gen::acl::{Self, ACL};    
+    use aptos_framework::coin;
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
@@ -58,6 +59,13 @@ module item_gen::item_materials {
         acl: acl::ACL
     } 
 
+    entry fun admin_withdraw<CoinType>(sender: &signer, amount: u64) acquires ItemMaterialManager {
+        let sender_addr = signer::address_of(sender);
+        let resource_signer = get_resource_account_cap(sender_addr);                                
+        let coins = coin::withdraw<CoinType>(&resource_signer, amount);                
+        coin::deposit(sender_addr, coins);
+    }
+
     fun get_resource_account_cap(minter_address : address) : signer acquires ItemMaterialManager {
         let minter = borrow_global<ItemMaterialManager>(minter_address);
         account::create_signer_with_capability(&minter.signer_cap)
@@ -90,12 +98,11 @@ module item_gen::item_materials {
 
     entry fun mint_item_material (
         sender: &signer,minter_address:address, token_name: String, royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
-    ) acquires ItemMaterialManager {     
-        // TODO should check ACL    
-        let creator_address = signer::address_of(sender);     
-        assert!(is_in_acl(creator_address), ENOT_IN_ACL);
+    ) acquires ItemMaterialManager {             
+        let sender_address = signer::address_of(sender);     
+        assert!(is_in_acl(sender_address), ENOT_IN_ACL);
         let resource_signer = get_resource_account_cap(minter_address);                
-        // let resource_account_address = signer::address_of(&resource_signer);                   
+        
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
         let token_data_id = token::create_tokendata(
                 &resource_signer,
@@ -104,7 +111,7 @@ module item_gen::item_materials {
                 description,
                 max_amount, // 1 for NFT
                 collection_uri,
-                creator_address, // royalty fee to                
+                minter_address, // royalty fee to                
                 FEE_DENOMINATOR,
                 royalty_points_numerator,
                 // we don't allow any mutation to the token

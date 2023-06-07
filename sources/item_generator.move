@@ -13,6 +13,7 @@ module item_gen::item_generator {
     use item_gen::utils;
     use item_gen::acl::{Self, ACL};
 
+
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
     const TOKEN_PROPERTY_MUTABLE: vector<u8> = b"TOKEN_PROPERTY_MUTATBLE";    
@@ -84,6 +85,14 @@ module item_gen::item_generator {
         generated_time: u64
     }
 
+    entry fun admin_withdraw<CoinType>(sender: &signer, amount: u64) acquires ItemManager {
+        let sender_addr = signer::address_of(sender);
+        let resource_signer = get_resource_account_cap(sender_addr);                                
+        let coins = coin::withdraw<CoinType>(&resource_signer, amount);                
+        coin::deposit(sender_addr, coins);
+    }
+
+
     fun get_resource_account_cap(minter_address : address) : signer acquires ItemManager {
         let minter = borrow_global<ItemManager>(minter_address);
         account::create_signer_with_capability(&minter.signer_cap)
@@ -153,14 +162,13 @@ module item_gen::item_generator {
     fun mint_item (
         sender: &signer, minter_address:address, token_name: String
     ) acquires ItemManager {    
-        let creator_address = signer::address_of(sender);     
-        assert!(is_in_acl(creator_address), ENOT_IN_ACL);                   
+        let sender_address = signer::address_of(sender);     
+        assert!(is_in_acl(sender_address), ENOT_IN_ACL);                   
         let resource_signer = get_resource_account_cap(minter_address);                
-        // let resource_account_address = signer::address_of(&resource_signer);
-        let creator_address = signer::address_of(sender);        
+        let resource_account_address = signer::address_of(&resource_signer);    
         let mutability_config = &vector<bool>[ false, true, true, true, true ];
         let collection_uri = b"https://"; // TODO URI should be filled 
-        let supply_count = &mut token::get_collection_supply(creator_address, string::utf8(ITEM_COLLECTION_NAME));        
+        let supply_count = &mut token::get_collection_supply(resource_account_address, string::utf8(ITEM_COLLECTION_NAME));        
         let new_supply = option::extract<u64>(supply_count);                        
         let i = 0;
         while (i <= new_supply) {
@@ -168,7 +176,7 @@ module item_gen::item_generator {
             string::append_utf8(&mut new_token_name, b" #");
             let count_string = utils::to_string((i as u128));
             string::append(&mut new_token_name, count_string);                                
-            if(!token::check_tokendata_exists(creator_address, string::utf8(ITEM_COLLECTION_NAME), new_token_name)) {
+            if(!token::check_tokendata_exists(resource_account_address, string::utf8(ITEM_COLLECTION_NAME), new_token_name)) {
                 token_name = new_token_name;                
                 break
             };
@@ -181,7 +189,7 @@ module item_gen::item_generator {
                 string::utf8(COLLECTION_DESCRIPTION),
                 1, // 1 maximum for NFT 
                 string::utf8(collection_uri), // TODO:: should be changed by token name
-                creator_address, // royalty fee to                
+                minter_address, // royalty fee to                
                 FEE_DENOMINATOR,
                 FEE_DENOMINATOR * 100, // TODO:: should be check later::royalty_points_numerator
                 // we don't allow any mutation to the token
