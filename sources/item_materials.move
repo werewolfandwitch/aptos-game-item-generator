@@ -112,7 +112,6 @@ module item_gen::item_materials {
         let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);
         let acl = manager.acl;        
         acl::add(&mut acl, sender_addr);
-
         event::emit_event(&mut manager.acl_events, AclAddEvent { 
             added: sender_addr,            
         });        
@@ -126,12 +125,12 @@ module item_gen::item_materials {
         token_name: String, 
         royalty_points_numerator:u64, 
         description:String, 
-        collection_uri:String, max_amount:u64, amount:u64
+        collection_uri:String
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);
         let manager = borrow_global<ItemMaterialManager>(sender_address);     
         let acl = manager.acl;        
-        acl::assert_contains(&acl,sender_address );
+        acl::assert_contains(&acl,sender_address);
         let resource_signer = get_resource_account_cap(minter_address);                
         
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
@@ -140,7 +139,7 @@ module item_gen::item_materials {
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                max_amount, // 1 for NFT
+                1, // 1 for NFT
                 collection_uri,
                 minter_address, // royalty fee to                
                 FEE_DENOMINATOR,
@@ -152,7 +151,7 @@ module item_gen::item_materials {
                 vector<vector<u8>>[bcs::to_bytes<bool>(&true),bcs::to_bytes<bool>(&false)],  // values 
                 vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
         );
-        let token_id = token::mint_token(&resource_signer, token_data_id, amount);
+        let token_id = token::mint_token(&resource_signer, token_data_id, 1);
         token::opt_in_direct_transfer(sender, true);
         token::direct_transfer(&resource_signer, sender, token_id, 1);        
     }    
