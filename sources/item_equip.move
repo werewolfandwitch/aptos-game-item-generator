@@ -74,8 +74,7 @@ module item_gen::item_equip {
             });
         };        
         let manager = borrow_global_mut<ItemHolder>(sender_addr);
-        let acl = manager.acl;        
-        acl::add(&mut acl, sender_addr);
+        acl::add(&mut manager.acl, sender_addr);
     }
     
     // keep item in resource account with claim receipt

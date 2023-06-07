@@ -127,8 +127,7 @@ module item_gen::item_generator {
         token::create_collection(&resource_signer, string::utf8(ITEM_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
         
         let manager = borrow_global_mut<ItemManager>(sender_addr);
-        let acl = manager.acl;        
-        acl::add(&mut acl, sender_addr);
+        acl::add(&mut manager.acl, sender_addr);              
     }    
 
     entry fun add_recipe (

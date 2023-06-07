@@ -80,18 +80,16 @@ module item_gen::item_materials {
 
     entry fun add_acl(sender: &signer, addr:address) acquires ItemMaterialManager  {                    
         let sender_addr = signer::address_of(sender);                
-        let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);
-        let acl = manager.acl;        
-        acl::add(&mut acl, addr);
+        let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);        
+        acl::add(&mut manager.acl, sender_addr);
         event::emit_event(&mut manager.acl_events, AclAddEvent { 
             added: addr,            
         });        
     }
 
     fun is_in_acl(sender_addr:address) : bool acquires ItemMaterialManager {
-        let manager = borrow_global<ItemMaterialManager>(sender_addr);
-        let acl = manager.acl;        
-        acl::contains(&acl, sender_addr)
+        let manager = borrow_global<ItemMaterialManager>(sender_addr);        
+        acl::contains(&manager.acl, sender_addr)
     }
     // resource cab required 
     entry fun init(sender: &signer,collection_uri: String,maximum_supply:u64) acquires ItemMaterialManager {
@@ -109,15 +107,13 @@ module item_gen::item_materials {
         token::create_collection(&resource_signer, 
             string::utf8(ITEM_MATERIAL_COLLECTION_NAME), 
             string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);        
-        let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);
-        let acl = manager.acl;        
-        acl::add(&mut acl, sender_addr);
+        let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);             
+        acl::add(&mut manager.acl, sender_addr);
         event::emit_event(&mut manager.acl_events, AclAddEvent { 
             added: sender_addr,            
         });        
 
     }        
-
 
     entry fun mint_item_material (
         sender: &signer, 
@@ -128,9 +124,8 @@ module item_gen::item_materials {
         collection_uri:String, max_amount:u64, amount:u64
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);
-        let manager = borrow_global<ItemMaterialManager>(sender_address);     
-        let acl = manager.acl;        
-        acl::assert_contains(&acl,sender_address);
+        let manager = borrow_global<ItemMaterialManager>(sender_address);             
+        acl::assert_contains(&manager.acl,sender_address);
         let resource_signer = get_resource_account_cap(minter_address);                
         
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
