@@ -146,7 +146,7 @@ module item_gen::item_materials {
         );
         let token_id = token::mint_token(&resource_signer, token_data_id, amount);
         token::opt_in_direct_transfer(sender, true);
-        token::direct_transfer(&resource_signer, sender, token_id, 1);        
+        token::direct_transfer(&resource_signer, sender, token_id, amount);        
     }    
 }
 
