@@ -193,7 +193,7 @@ module item_gen::item_generator {
     }
         
     fun mint_item (
-        sender: &signer, minter_address:address, token_name: String
+        sender: &signer, minter_address:address, token_name: String, target_item_uri:String
     ) acquires ItemManager {    
         let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);                           
@@ -221,7 +221,7 @@ module item_gen::item_generator {
                 token_name,
                 string::utf8(COLLECTION_DESCRIPTION),
                 1, // 1 maximum for NFT 
-                string::utf8(collection_uri), // TODO:: should be changed by token name
+                string::utf8(target_item_uri), // TODO:: should be changed by token name
                 minter_address, // royalty fee to                
                 FEE_DENOMINATOR,
                 4000, // TODO:: should be check later::royalty_points_numerator
@@ -238,7 +238,9 @@ module item_gen::item_generator {
     }
     // synthesis => item systhesys by item recicpe    
     entry fun synthesis_two_item<WarCoinType>(
-        sender: &signer, minter_address:address, item_material_creator:address, target_item:String, token_name_1: String, token_name_2: String, property_version:u64
+        sender: &signer, minter_address:address, 
+        item_material_creator:address, target_item:String, token_name_1: String, token_name_2: String, property_version:u64,
+        target_item_uri:String,
     ) acquires Recipes, ItemManager {
         // check collection name and creator address
         assert!(item_material_creator == @item_material_creator, ENOT_CREATOR);
