@@ -7,6 +7,7 @@ module item_gen::item_materials {
     use aptos_token::token::{Self};
     use item_gen::acl::{Self, ACL};    
     use aptos_framework::coin;
+    use aptos_framework::event::{Self, EventHandle};
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
@@ -56,8 +57,14 @@ module item_gen::item_materials {
 
     struct ItemMaterialManager has store, key {          
         signer_cap: account::SignerCapability,                 
-        acl: acl::ACL
-    } 
+        acl: acl::ACL,
+        acl_events:EventHandle<AclAddEvent>,
+    }
+
+    struct AclAddEvent has drop, store {
+        added: address,        
+    }
+
 
     entry fun admin_withdraw<CoinType>(sender: &signer, amount: u64) acquires ItemMaterialManager {
         let sender_addr = signer::address_of(sender);
@@ -91,7 +98,8 @@ module item_gen::item_materials {
         if(!exists<ItemMaterialManager>(sender_addr)){            
             move_to(sender, ItemMaterialManager {                
                 signer_cap,  
-                acl: acl::empty()                             
+                acl: acl::empty(),
+                acl_events:account::new_event_handle<AclAddEvent>(sender)                             
             });
         };                
         let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
@@ -101,6 +109,11 @@ module item_gen::item_materials {
         let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);
         let acl = manager.acl;        
         acl::add(&mut acl, sender_addr);
+
+        event::emit_event(&mut manager.acl_events, AclAddEvent { 
+            added: sender_addr,            
+        });        
+
     }        
 
 
