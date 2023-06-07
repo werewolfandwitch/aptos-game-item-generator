@@ -84,7 +84,7 @@ module item_gen::item_materials {
         let acl = manager.acl;        
         acl::add(&mut acl, addr);
         event::emit_event(&mut manager.acl_events, AclAddEvent { 
-            added: sender_addr,            
+            added: addr,            
         });        
     }
 
