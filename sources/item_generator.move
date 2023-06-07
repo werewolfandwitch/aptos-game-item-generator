@@ -18,6 +18,7 @@ module item_gen::item_generator {
     const TOKEN_PROPERTY_MUTABLE: vector<u8> = b"TOKEN_PROPERTY_MUTATBLE";    
 
     const FEE_DENOMINATOR: u64 = 100000;
+
     
     // collection name / info
     const ITEM_COLLECTION_NAME:vector<u8> = b"W&W ITEM";
@@ -27,6 +28,7 @@ module item_gen::item_generator {
     const ENOT_CREATOR:u64 = 1;
     const ESAME_MATERIAL:u64 = 2;
     const ENOT_IN_RECIPE:u64 = 3;
+    const ENOT_IN_ACL: u64 = 4;
 
     // property for game
 
@@ -93,7 +95,7 @@ module item_gen::item_generator {
         acl::contains(&acl, sender_addr)
     }
     // resource cab required 
-    entry fun init<WarCoinType>(sender: &signer,collection_uri:String,maximum_supply:u64) {
+    entry fun init<WarCoinType>(sender: &signer,collection_uri:String,maximum_supply:u64) acquires ItemManager{
         let sender_addr = signer::address_of(sender);                
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"01");    
         token::initialize_token_store(&resource_signer);
@@ -115,6 +117,10 @@ module item_gen::item_generator {
         };
         let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
         token::create_collection(&resource_signer, string::utf8(ITEM_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
+        
+        let manager = borrow_global_mut<ItemManager>(sender_addr);
+        let acl = manager.acl;        
+        acl::add(&mut acl, sender_addr);
     }    
 
     entry fun add_recipe (
@@ -146,9 +152,11 @@ module item_gen::item_generator {
         
     fun mint_item (
         sender: &signer, minter_address:address, token_name: String
-    ) acquires ItemManager {                       
+    ) acquires ItemManager {    
+        let creator_address = signer::address_of(sender);     
+        assert!(is_in_acl(creator_address), ENOT_IN_ACL);                   
         let resource_signer = get_resource_account_cap(minter_address);                
-        let resource_account_address = signer::address_of(&resource_signer);
+        // let resource_account_address = signer::address_of(&resource_signer);
         let creator_address = signer::address_of(sender);        
         let mutability_config = &vector<bool>[ false, true, true, true, true ];
         let collection_uri = b"https://"; // TODO URI should be filled 

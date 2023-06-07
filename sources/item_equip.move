@@ -15,6 +15,7 @@ module item_gen::item_equip {
     const ITEM_COLLECTION_NAME:vector<u8> = b"W&W ITEM";    
     const ECONTAIN:u64 = 1;
     const ENOT_CONTAIN:u64 = 2;
+    const ENOT_IN_ACL: u64 = 3;
     
     struct ItemHolder has store, key {          
         signer_cap: account::SignerCapability,
@@ -54,7 +55,7 @@ module item_gen::item_equip {
         acl::contains(&acl, sender_addr)
     }
 
-    entry fun init (sender: &signer) {
+    entry fun init (sender: &signer) acquires ItemHolder {
         let sender_addr = signer::address_of(sender);
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"03");    
         token::initialize_token_store(&resource_signer);
@@ -64,6 +65,9 @@ module item_gen::item_equip {
                 acl: acl::empty()               
             });
         };        
+        let manager = borrow_global_mut<ItemHolder>(sender_addr);
+        let acl = manager.acl;        
+        acl::add(&mut acl, sender_addr);
     }
 
     entry fun add_auth() {

@@ -95,7 +95,7 @@ module item_gen::item_materials {
         let creator_address = signer::address_of(sender);     
         assert!(is_in_acl(creator_address), ENOT_IN_ACL);
         let resource_signer = get_resource_account_cap(minter_address);                
-        let resource_account_address = signer::address_of(&resource_signer);                   
+        // let resource_account_address = signer::address_of(&resource_signer);                   
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
         let token_data_id = token::create_tokendata(
                 &resource_signer,
