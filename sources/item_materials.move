@@ -71,6 +71,13 @@ module item_gen::item_materials {
         account::create_signer_with_capability(&minter.signer_cap)
     }    
 
+    entry fun add_acl(sender: &signer, addr:address) : bool acquires ItemMaterialManager {
+        let sender_addr = signer::address_of(sender);                
+        let manager = borrow_global<ItemMaterialManager>(sender_addr);
+        let acl = manager.acl;        
+        acl::add(&mut acl, addr);
+    }
+
     fun is_in_acl(sender_addr:address) : bool acquires ItemMaterialManager {
         let manager = borrow_global<ItemMaterialManager>(sender_addr);
         let acl = manager.acl;        
@@ -88,8 +95,9 @@ module item_gen::item_materials {
             });
         };                
         let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
-        token::create_collection(&resource_signer, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
-        
+        token::create_collection(&resource_signer, 
+            string::utf8(ITEM_MATERIAL_COLLECTION_NAME), 
+            string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);        
         let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);
         let acl = manager.acl;        
         acl::add(&mut acl, sender_addr);
@@ -97,7 +105,12 @@ module item_gen::item_materials {
 
 
     entry fun mint_item_material (
-        sender: &signer,minter_address:address, token_name: String, royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
+        sender: &signer, 
+        minter_address:address, 
+        token_name: String, 
+        royalty_points_numerator:u64, 
+        description:String, 
+        collection_uri:String, max_amount:u64, amount:u64
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);

@@ -162,7 +162,7 @@ module item_gen::item_generator {
         sender: &signer, minter_address:address, token_name: String
     ) acquires ItemManager {    
         let sender_address = signer::address_of(sender);     
-        assert!(is_in_acl(sender_address), ENOT_IN_ACL);                   
+        assert!(is_in_acl(sender_address), ENOT_IN_ACL);                           
         let resource_signer = get_resource_account_cap(minter_address);                
         let resource_account_address = signer::address_of(&resource_signer);    
         let mutability_config = &vector<bool>[ false, true, true, true, true ];
