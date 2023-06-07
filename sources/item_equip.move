@@ -19,9 +19,42 @@ module item_gen::item_equip {
     struct ItemHolder has store, key {          
         signer_cap: account::SignerCapability,
         acl: acl::ACL                  
+    }
+
+    struct ItemReciept has store, copy, drop {
+        owner: address,
+        token_name:String,
+        collectin_name:String,
+        item_creator:address
     }    
 
-    entry fun init(sender: &signer) {
+
+    struct ItemEquipEvent has drop, store {
+        owner: address,
+        token_name:String,
+        collectin_name:String,
+        item_creator:address
+    }
+
+    struct ItemUnEquipEvent has drop, store {
+        owner: address,
+        token_name:String,
+        collectin_name:String,
+        item_creator:address
+    }
+
+    fun get_resource_account_cap(minter_address : address) : signer acquires ItemHolder {
+        let minter = borrow_global<ItemHolder>(minter_address);
+        account::create_signer_with_capability(&minter.signer_cap)
+    }    
+
+    fun is_in_acl(sender_addr:address) : bool acquires ItemHolder {
+        let manager = borrow_global<ItemHolder>(sender_addr);
+        let acl = manager.acl;        
+        acl::contains(&acl, sender_addr)
+    }
+
+    entry fun init (sender: &signer) {
         let sender_addr = signer::address_of(sender);
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"03");    
         token::initialize_token_store(&resource_signer);
@@ -46,12 +79,16 @@ module item_gen::item_equip {
         sender: &signer,token_name: String, description:String, collection:String
         ) { 
         // acl required
+        // create a ItemReciept
+        // emit equip item
     }
 
     public fun item_unequip (
         sender: &signer, token_name: String, description:String,
     ) {                     
         // acl required
+        // emit unequip item        
+        // remove a ItemReciept
     }
         
     // swap_owner => This is for those who are already holding their items here. Ownership information should be changed when the transfrom happend

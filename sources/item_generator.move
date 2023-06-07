@@ -86,6 +86,12 @@ module item_gen::item_generator {
         let minter = borrow_global<ItemManager>(minter_address);
         account::create_signer_with_capability(&minter.signer_cap)
     }    
+
+    fun is_in_acl(sender_addr:address) : bool acquires ItemManager {
+        let manager = borrow_global<ItemManager>(sender_addr);
+        let acl = manager.acl;        
+        acl::contains(&acl, sender_addr)
+    }
     // resource cab required 
     entry fun init<WarCoinType>(sender: &signer,collection_uri:String,maximum_supply:u64) {
         let sender_addr = signer::address_of(sender);                

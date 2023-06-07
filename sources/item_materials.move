@@ -13,6 +13,8 @@ module item_gen::item_materials {
 
     const FEE_DENOMINATOR: u64 = 100000;
 
+    const ENOT_IN_ACL: u64 = 1;
+
     // collection name / info
     const ITEM_MATERIAL_COLLECTION_NAME:vector<u8> = b"W&W ITEM MATERIAL";
     const COLLECTION_DESCRIPTION:vector<u8> = b"These materials are used for item synthesis in W&W";
@@ -60,8 +62,14 @@ module item_gen::item_materials {
         let minter = borrow_global<ItemMaterialManager>(minter_address);
         account::create_signer_with_capability(&minter.signer_cap)
     }    
+
+    fun is_in_acl(sender_addr:address) : bool acquires ItemMaterialManager {
+        let manager = borrow_global<ItemMaterialManager>(sender_addr);
+        let acl = manager.acl;        
+        acl::contains(&acl, sender_addr)
+    }
     // resource cab required 
-    entry fun init(sender: &signer,collection_uri:String,maximum_supply:u64) {
+    entry fun init(sender: &signer,collection_uri: String,maximum_supply:u64) acquires ItemMaterialManager {
         let sender_addr = signer::address_of(sender);                
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"02");    
         token::initialize_token_store(&resource_signer);
@@ -70,20 +78,24 @@ module item_gen::item_materials {
                 signer_cap,  
                 acl: acl::empty()                             
             });
-        };        
-        
+        };                
         let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
         token::create_collection(&resource_signer, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
-    }
         
+        let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);
+        let acl = manager.acl;        
+        acl::add(&mut acl, sender_addr);
+    }        
+
 
     entry fun mint_item_material (
         sender: &signer,minter_address:address, token_name: String, royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
     ) acquires ItemMaterialManager {     
         // TODO should check ACL    
+        let creator_address = signer::address_of(sender);     
+        assert!(is_in_acl(creator_address), ENOT_IN_ACL);
         let resource_signer = get_resource_account_cap(minter_address);                
-        let resource_account_address = signer::address_of(&resource_signer);        
-        let creator_address = signer::address_of(sender);        
+        let resource_account_address = signer::address_of(&resource_signer);                   
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
         let token_data_id = token::create_tokendata(
                 &resource_signer,
@@ -105,40 +117,6 @@ module item_gen::item_materials {
         let token_id = token::mint_token(&resource_signer, token_data_id, amount);
         token::opt_in_direct_transfer(sender, true);
         token::direct_transfer(&resource_signer, sender, token_id, 1);        
-    }
-
-    // public fun mint_item_material (
-    //     sender: &signer, 
-    //     minter_address:address, 
-    //     token_name: String, 
-    //     royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
-    // ) acquires ItemMaterialManager {        
-    //     // TODO should check ACL    
-    //     // must called by W&W contract.
-    //     let resource_signer = get_resource_account_cap(minter_address);                
-    //     let resource_account_address = signer::address_of(&resource_signer);        
-    //     let creator_address = signer::address_of(sender);        
-    //     let mutability_config = &vector<bool>[ true, true, false, true, true ];              
-    //     let token_data_id = token::create_tokendata(
-    //             &resource_signer,
-    //             string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
-    //             token_name,
-    //             description,
-    //             max_amount, // 1 for NFT
-    //             collection_uri,
-    //             creator_address, // royalty fee to                
-    //             FEE_DENOMINATOR,
-    //             royalty_points_numerator,
-    //             // we don't allow any mutation to the token
-    //             token::create_token_mutability_config(mutability_config),
-    //             // type
-    //             vector<String>[string::utf8(BURNABLE_BY_OWNER),string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
-    //             vector<vector<u8>>[bcs::to_bytes<bool>(&true),bcs::to_bytes<bool>(&false)],  // values 
-    //             vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
-    //     );
-    //     let token_id = token::mint_token(&resource_signer, token_data_id, amount);
-    //     token::opt_in_direct_transfer(sender, true);
-    //     token::direct_transfer(&resource_signer, sender, token_id, 1);        
-    // }  
+    }    
 }
 
