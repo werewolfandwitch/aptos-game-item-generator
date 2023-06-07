@@ -199,8 +199,7 @@ module item_gen::item_generator {
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);                           
         let resource_signer = get_resource_account_cap(minter_address);                
         let resource_account_address = signer::address_of(&resource_signer);    
-        let mutability_config = &vector<bool>[ false, true, true, true, true ];
-        let collection_uri = b"https://"; // TODO URI should be filled 
+        let mutability_config = &vector<bool>[ false, true, true, true, true ];        
         let supply_count = &mut token::get_collection_supply(resource_account_address, string::utf8(ITEM_COLLECTION_NAME));        
         let new_supply = option::extract<u64>(supply_count);                        
         let i = 0;
@@ -221,7 +220,7 @@ module item_gen::item_generator {
                 token_name,
                 string::utf8(COLLECTION_DESCRIPTION),
                 1, // 1 maximum for NFT 
-                string::utf8(target_item_uri), // TODO:: should be changed by token name
+                target_item_uri, 
                 minter_address, // royalty fee to                
                 FEE_DENOMINATOR,
                 4000, // TODO:: should be check later::royalty_points_numerator
@@ -252,6 +251,6 @@ module item_gen::item_generator {
         token::burn(sender, item_material_creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version, 1);
         token::burn(sender, item_material_creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
         
-        mint_item(sender, minter_address, target_item);        
+        mint_item(sender, minter_address, target_item, target_item_uri);        
     }        
 }
