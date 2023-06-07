@@ -128,8 +128,10 @@ module item_gen::item_materials {
         description:String, 
         collection_uri:String, max_amount:u64, amount:u64
     ) acquires ItemMaterialManager {             
-        let sender_address = signer::address_of(sender);     
-        assert!(is_in_acl(sender_address), ENOT_IN_ACL);
+        let sender_address = signer::address_of(sender);
+        let manager = borrow_global<ItemMaterialManager>(sender_address);     
+        let acl = manager.acl;        
+        acl::assert_contains(&acl,sender_address );
         let resource_signer = get_resource_account_cap(minter_address);                
         
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
