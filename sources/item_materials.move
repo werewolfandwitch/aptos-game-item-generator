@@ -5,7 +5,7 @@ module item_gen::item_materials {
     use std::string::{Self, String};    
     use aptos_framework::account;    
     use aptos_token::token::{Self};
-    use item_gen::acl::{Self, ACL};    
+    use item_gen::acl::{Self};    
     use aptos_framework::coin;
     use aptos_framework::event::{Self, EventHandle};
 
@@ -115,14 +115,13 @@ module item_gen::item_materials {
     }        
 
     entry fun mint_item_material (
-        sender: &signer, 
-        minter_address:address, 
+        sender: &signer,         
         token_name: String,         
         description:String, 
         collection_uri:String, max_amount:u64, amount:u64
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);
-        let resource_signer = get_resource_account_cap(minter_address);                
+        let resource_signer = get_resource_account_cap(sender_address);                
         let resource_account_address = signer::address_of(&resource_signer);     
         let manager = borrow_global<ItemMaterialManager>(sender_address);             
         acl::assert_contains(&manager.acl,sender_address);                
@@ -136,7 +135,7 @@ module item_gen::item_materials {
                 description,
                 max_amount, // 1 for NFT
                 collection_uri,
-                minter_address, // royalty fee to                
+                sender_address, // royalty fee to                
                 FEE_DENOMINATOR,
                 4000,
                 // we don't allow any mutation to the token

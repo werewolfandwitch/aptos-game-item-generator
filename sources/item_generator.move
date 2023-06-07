@@ -11,7 +11,7 @@ module item_gen::item_generator {
     use std::vector;
     use aptos_framework::account;    
     use item_gen::utils;
-    use item_gen::acl::{Self, ACL};
+    use item_gen::acl::{Self};
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
@@ -237,7 +237,7 @@ module item_gen::item_generator {
         token::direct_transfer(&resource_signer, sender, token_id, 1);        
     }
     // synthesis => item systhesys by item recicpe    
-    entry fun synthesis_two_item(
+    entry fun synthesis_two_item<WarCoinType>(
         sender: &signer, minter_address:address, item_material_creator:address, target_item:String, token_name_1: String, token_name_2: String, property_version:u64
     ) acquires Recipes, ItemManager {
         // check collection name and creator address
