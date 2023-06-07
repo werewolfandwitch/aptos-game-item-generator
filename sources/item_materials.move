@@ -100,7 +100,7 @@ module item_gen::item_materials {
             move_to(sender, ItemMaterialManager {                
                 signer_cap,  
                 acl: acl::empty(),
-                acl_events:account::new_event_handle<AclAddEvent>(sender)                             
+                acl_events:account::new_event_handle<AclAddEvent>(sender)
             });
         };                
         let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
@@ -112,7 +112,6 @@ module item_gen::item_materials {
         event::emit_event(&mut manager.acl_events, AclAddEvent { 
             added: sender_addr,            
         });        
-
     }        
 
     entry fun mint_item_material (

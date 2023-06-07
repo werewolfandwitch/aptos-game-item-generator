@@ -63,10 +63,24 @@ module item_gen::item_generator {
     // Effect: By combining the lunar-infused moonstone ore with the dark, iridescent kraken ink, you craft the Tidecaller Pendant. This enchanted pendant allows the wearer to command the tides and manipulate water-based magic, granting them control over aquatic forces.
 
     struct Recipes has key {
-        recipes: Table<String, ItemComposition> // <Name of Item, Item Composition>
+        recipes: Table<String, ItemComposition>, // <Name of Item, Item Composition>
+        recipe_add_events:EventHandle<ItemRecipeAdded>,
+        recipe_check_events:EventHandle<ItemRecipeCheck>,
     }
 
-    struct ItemComposition has key, store,drop {
+    struct ItemRecipeAdded has drop, store {
+        material_1: String,        
+        material_2: String,
+        item: String,
+    }
+
+    struct ItemRecipeCheck has drop, store {
+        material_1: bool,        
+        material_2: bool,
+        item: String,
+    }
+
+    struct ItemComposition has key, store, drop {
         composition: vector<String>
     }
 
@@ -110,19 +124,23 @@ module item_gen::item_generator {
         if(!exists<ItemManager>(sender_addr)){            
             move_to(sender, ItemManager {                
                 signer_cap,  
-                acl: acl::empty()                             
+                acl: acl::empty(),
+                
             });
         };
 
         if(!exists<Recipes>(sender_addr)){
             move_to(sender, Recipes {
-                recipes: table::new()
+                recipes: table::new(),
+                recipe_add_events: account::new_event_handle<ItemRecipeAdded>(sender),
+                recipe_check_events: account::new_event_handle<ItemRecipeCheck>(sender)
             });
         };
 
         if(!coin::is_account_registered<WarCoinType>(signer::address_of(&resource_signer))){
             coin::register<WarCoinType>(&resource_signer);
         };
+
         let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
         token::create_collection(&resource_signer, string::utf8(ITEM_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
         
@@ -134,11 +152,16 @@ module item_gen::item_generator {
         sender: &signer, item_token_name: String, material_token_name_1:String, material_token_name_2:String
         ) acquires Recipes {
         let creator_address = signer::address_of(sender);
-        let minter = borrow_global_mut<Recipes>(creator_address);
+        let recieps = borrow_global_mut<Recipes>(creator_address);
         let values = vector<String>[ material_token_name_1, material_token_name_2];
-        table::add(&mut minter.recipes, item_token_name, ItemComposition {
+        table::add(&mut recieps.recipes, item_token_name, ItemComposition {
             composition: values
-        });
+        });        
+        event::emit_event(&mut recieps.recipe_add_events, ItemRecipeAdded { 
+            material_1: material_token_name_1,        
+            material_2: material_token_name_2,
+            item: item_token_name,            
+        });        
     }
 
     fun check_recipe(creator_address: address, item_token_name: String, material_token_name_1:String, material_token_name_2:String) : bool acquires Recipes {        
@@ -147,6 +170,18 @@ module item_gen::item_generator {
         let contain1 = vector::contains(&recipe.composition, &material_token_name_1);
         let contain2 = vector::contains(&recipe.composition, &material_token_name_2);
         contain1 && contain2        
+    }
+
+    entry fun check_recipe_entry(creator_address: address, item_token_name: String, material_token_name_1:String, material_token_name_2:String) acquires Recipes {        
+        let minter = borrow_global_mut<Recipes>(creator_address);
+        let recipe = table::borrow(&minter.recipes, item_token_name);
+        let contain1 = vector::contains(&recipe.composition, &material_token_name_1);
+        let contain2 = vector::contains(&recipe.composition, &material_token_name_2);
+        event::emit_event(&mut minter.recipe_check_events, ItemRecipeCheck { 
+            material_1: contain1,        
+            material_2: contain2,
+            item: item_token_name,            
+        });        
     }
 
     entry fun remove_recipe(
