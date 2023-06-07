@@ -85,7 +85,7 @@ module item_gen::item_generator {
         account::create_signer_with_capability(&minter.signer_cap)
     }    
     // resource cab required 
-    entry fun init<WarCoinType>(sender: &signer,) {
+    entry fun init<WarCoinType>(sender: &signer,collection_uri:String,maximum_supply:u64) {
         let sender_addr = signer::address_of(sender);                
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"01");    
         token::initialize_token_store(&resource_signer);
@@ -104,13 +104,9 @@ module item_gen::item_generator {
         if(!coin::is_account_registered<WarCoinType>(signer::address_of(&resource_signer))){
             coin::register<WarCoinType>(&resource_signer);
         };
-    }
-
-    entry fun create_collection (
-        sender: &signer, collection_uri: String, maximum_supply: u64, mutate_setting: vector<bool>
-        ) {                                             
-        token::create_collection(sender, string::utf8(ITEM_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
-    }
+        let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
+        token::create_collection(&resource_signer, string::utf8(ITEM_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
+    }    
 
     entry fun add_recipe (
         sender: &signer, item_token_name: String, material_token_name_1:String, material_token_name_2:String
@@ -138,12 +134,12 @@ module item_gen::item_generator {
         let recipes = borrow_global_mut<Recipes>(creator_address);
         table::remove(&mut recipes.recipes, item_token_name);                                                 
     }
-    
-    // 50% success / 50% fail to mint
-    // item synthesis for test item. not for pulbic
+        
     fun mint_item (
-        sender: &signer, token_name: String
-    ) {        
+        sender: &signer, minter_address:address, token_name: String
+    ) acquires ItemManager {                       
+        let resource_signer = get_resource_account_cap(minter_address);                
+        let resource_account_address = signer::address_of(&resource_signer);
         let creator_address = signer::address_of(sender);        
         let mutability_config = &vector<bool>[ false, true, true, true, true ];
         let collection_uri = b"https://"; // TODO URI should be filled 
@@ -162,7 +158,7 @@ module item_gen::item_generator {
             i = i + 1;
         };                                               
         let token_data_id = token::create_tokendata(
-                sender,
+                &resource_signer,
                 string::utf8(ITEM_COLLECTION_NAME),
                 token_name,
                 string::utf8(COLLECTION_DESCRIPTION),
@@ -178,39 +174,24 @@ module item_gen::item_generator {
                 vector<vector<u8>>[bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&false)],  // values 
                 vector<String>[string::utf8(b"bool"),string::utf8(b"bool"), string::utf8(b"bool")],
         );
-        let token_id = token::mint_token(sender, token_data_id, 1);
+        let token_id = token::mint_token(&resource_signer, token_data_id, 1);
         token::opt_in_direct_transfer(sender, true);
-        token::direct_transfer(sender, sender, token_id, 1);        
+        token::direct_transfer(&resource_signer, sender, token_id, 1);        
     }
     // synthesis => item systhesys by item recicpe    
     entry fun synthesis_two_item(
-        sender: &signer, creator:address, target_item:String, token_name_1: String, token_name_2: String, property_version:u64
-    ) acquires Recipes {
+        sender: &signer, minter_address:address, item_material_creator:address, target_item:String, token_name_1: String, token_name_2: String, property_version:u64
+    ) acquires Recipes, ItemManager {
         // check collection name and creator address
-        assert!(creator == @item_material_creator, ENOT_CREATOR);
+        assert!(item_material_creator == @item_material_creator, ENOT_CREATOR);
         assert!(token_name_1 != token_name_2, ESAME_MATERIAL);
-        
-        // let token_id_1 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version);
-        // let token_id_2 = token::create_token_id_raw(creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version); 
+                
         // check is in recipe
         // Glimmering Crystals + Ethereal Essence
-        assert!(check_recipe(creator,target_item, token_name_1, token_name_2),ENOT_IN_RECIPE);
-        token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version, 1);
-        token::burn(sender, creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
+        assert!(check_recipe(item_material_creator, target_item, token_name_1, token_name_2), ENOT_IN_RECIPE);
+        token::burn(sender, item_material_creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_1, property_version, 1);
+        token::burn(sender, item_material_creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
         
-        mint_item(sender, target_item);
-        // create new
-        
-        // give new
-
-        // string::utf8(ITEM_COLLECTION_NAME);
-    }
-    // swap_owner => This is for those who are already holding their items here. Ownership information should be changed when the transfrom happend
-    // vector<address>
-    entry fun swap_owner(
-        sender: &signer, token_name: String, new_collection_name:String, new_token_name:String
-    ) {
-        // check ownership by sender address sender should be holder of character token 
-    }    
-
+        mint_item(sender, minter_address, target_item);        
+    }        
 }

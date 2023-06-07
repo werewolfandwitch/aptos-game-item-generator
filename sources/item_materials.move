@@ -3,7 +3,7 @@ module item_gen::item_materials {
     use std::bcs;
     use std::signer;    
     use std::string::{Self, String};    
-    
+    use aptos_framework::account;    
     use aptos_token::token::{Self};    
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
@@ -49,25 +49,45 @@ module item_gen::item_materials {
     // Kraken Ink: An ink harvested from the mighty krakens of the deep sea. It possesses a dark, iridescent sheen and is used in the creation of powerful spell scrolls or to inscribe protective runes.
 
     // Elemental Essence: Essence drawn from the elemental planes. Each elemental essence (fire, water, earth, air) grants specific properties and can be used in alchemy or enchanting to imbue items with elemental attributes.    
-    
-    entry fun create_collection<CoinType> (
-        sender: &signer,                
-        collection_uri: String, maximum_supply: u64, mutate_setting: vector<bool>
-        ) {                                             
-        token::create_collection(sender, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
+
+    struct ItemMaterialManager has store, key {          
+        signer_cap: account::SignerCapability,                 
+    } 
+
+    fun get_resource_account_cap(minter_address : address) : signer acquires ItemMaterialManager {
+        let minter = borrow_global<ItemMaterialManager>(minter_address);
+        account::create_signer_with_capability(&minter.signer_cap)
+    }    
+    // resource cab required 
+    entry fun init(sender: &signer,collection_uri:String,maximum_supply:u64) {
+        let sender_addr = signer::address_of(sender);                
+        let (resource_signer, signer_cap) = account::create_resource_account(sender, x"02");    
+        token::initialize_token_store(&resource_signer);
+        if(!exists<ItemMaterialManager>(sender_addr)){            
+            move_to(sender, ItemMaterialManager {                
+                signer_cap,                
+            });
+        };        
+        
+        let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
+        token::create_collection(&resource_signer, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);
     }
+        
 
     entry fun mint_item_material (
-        sender: &signer, token_name: String, royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
-    ) {        
+        sender: &signer,minter_address:address, token_name: String, royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
+    ) acquires ItemMaterialManager {     
+        // TODO should check ACL    
+        let resource_signer = get_resource_account_cap(minter_address);                
+        let resource_account_address = signer::address_of(&resource_signer);        
         let creator_address = signer::address_of(sender);        
         let mutability_config = &vector<bool>[ true, true, false, true, true ];              
         let token_data_id = token::create_tokendata(
-                sender,
+                &resource_signer,
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                max_amount, 
+                max_amount, // 1 for NFT
                 collection_uri,
                 creator_address, // royalty fee to                
                 FEE_DENOMINATOR,
@@ -79,9 +99,43 @@ module item_gen::item_materials {
                 vector<vector<u8>>[bcs::to_bytes<bool>(&true),bcs::to_bytes<bool>(&false)],  // values 
                 vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
         );
-        let token_id = token::mint_token(sender, token_data_id, amount);
+        let token_id = token::mint_token(&resource_signer, token_data_id, amount);
         token::opt_in_direct_transfer(sender, true);
-        token::direct_transfer(sender, sender, token_id, 1);        
+        token::direct_transfer(&resource_signer, sender, token_id, 1);        
+    }
+
+    public fun mint_item_material (
+        sender: &signer, 
+        minter_address:address, 
+        token_name: String, 
+        royalty_points_numerator:u64, description:String, collection_uri:String, max_amount:u64, amount:u64
+    ) acquires ItemMaterialManager {        
+        // TODO should check ACL    
+        // must called by W&W contract.
+        let resource_signer = get_resource_account_cap(minter_address);                
+        let resource_account_address = signer::address_of(&resource_signer);        
+        let creator_address = signer::address_of(sender);        
+        let mutability_config = &vector<bool>[ true, true, false, true, true ];              
+        let token_data_id = token::create_tokendata(
+                &resource_signer,
+                string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
+                token_name,
+                description,
+                max_amount, // 1 for NFT
+                collection_uri,
+                creator_address, // royalty fee to                
+                FEE_DENOMINATOR,
+                royalty_points_numerator,
+                // we don't allow any mutation to the token
+                token::create_token_mutability_config(mutability_config),
+                // type
+                vector<String>[string::utf8(BURNABLE_BY_OWNER),string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
+                vector<vector<u8>>[bcs::to_bytes<bool>(&true),bcs::to_bytes<bool>(&false)],  // values 
+                vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
+        );
+        let token_id = token::mint_token(&resource_signer, token_data_id, amount);
+        token::opt_in_direct_transfer(sender, true);
+        token::direct_transfer(&resource_signer, sender, token_id, 1);        
     }  
 }
 

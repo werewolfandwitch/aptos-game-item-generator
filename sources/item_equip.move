@@ -35,11 +35,11 @@ module item_gen::item_equip {
     }
 
     entry fun add_auth() {
-        // upsert table true with address.
+        // upsert table true with address. give authorized
     }
 
     entry fun remove_auth() {
-        // upsert table false with address.
+        // upsert table false with address. remove authorized
     }
     // keep item in resource account with claim receipt
     // sender address should be season contract address for authorization
@@ -52,6 +52,15 @@ module item_gen::item_equip {
     entry fun item_unequip (
         sender: &signer, token_name: String, description:String,
     ) {                     
+    }
+    // swap_owner => This is for those who are already holding their items here. Ownership information should be changed when the transfrom happend
+    // vector<address>
+    entry fun swap_owner(
+        sender: &signer, token_name: String, 
+        new_collection_name:String, // werewolf and witch collection name
+        new_token_name:String // 
+    ) {
+        // check ownership by sender address sender should be holder of character token 
     }  
 }
 
