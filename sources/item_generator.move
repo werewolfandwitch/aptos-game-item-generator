@@ -224,7 +224,7 @@ module item_gen::item_generator {
                 string::utf8(collection_uri), // TODO:: should be changed by token name
                 minter_address, // royalty fee to                
                 FEE_DENOMINATOR,
-                FEE_DENOMINATOR * 100, // TODO:: should be check later::royalty_points_numerator
+                4000, // TODO:: should be check later::royalty_points_numerator
                 // we don't allow any mutation to the token
                 token::create_token_mutability_config(mutability_config),
                 // type

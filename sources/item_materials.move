@@ -117,8 +117,7 @@ module item_gen::item_materials {
     entry fun mint_item_material (
         sender: &signer, 
         minter_address:address, 
-        token_name: String, 
-        royalty_points_numerator:u64, 
+        token_name: String,         
         description:String, 
         collection_uri:String, max_amount:u64, amount:u64
     ) acquires ItemMaterialManager {             
@@ -137,7 +136,7 @@ module item_gen::item_materials {
                 collection_uri,
                 minter_address, // royalty fee to                
                 FEE_DENOMINATOR,
-                royalty_points_numerator,
+                4000,
                 // we don't allow any mutation to the token
                 token::create_token_mutability_config(mutability_config),
                 // type
