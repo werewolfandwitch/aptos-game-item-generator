@@ -1,7 +1,7 @@
 
 module item_gen::item_equip {           
-    use std::signer;    
-    use std::string::{String};    
+    use std::signer;        
+    use std::string::{String};
     use aptos_framework::account;    
     use aptos_token::token::{Self};    
     use aptos_std::table::{Self, Table};  
@@ -15,6 +15,7 @@ module item_gen::item_equip {
     const ECONTAIN:u64 = 1;
     const ENOT_CONTAIN:u64 = 2;
     const ENOT_IN_ACL: u64 = 3;
+    const EIS_TOP_LEVEL: u64 = 4;
     
     struct ItemHolder has store, key {          
         signer_cap: account::SignerCapability,

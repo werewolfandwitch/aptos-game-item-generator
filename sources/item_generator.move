@@ -5,6 +5,7 @@ module item_gen::item_generator {
     use std::string::{Self, String};    
     use std::option::{Self};
     use aptos_std::table::{Self, Table};  
+    use aptos_token::property_map::{Self};
     use aptos_token::token::{Self}; 
     use aptos_framework::coin;    
     use aptos_framework::event::{Self, EventHandle};
@@ -24,11 +25,15 @@ module item_gen::item_generator {
     const ITEM_COLLECTION_NAME:vector<u8> = b"W&W ITEM";
     const ITEM_MATERIAL_COLLECTION_NAME:vector<u8> = b"W&W ITEM MATERIAL";
     const COLLECTION_DESCRIPTION:vector<u8> = b"these items can be equipped by characters in W&W";
+    // item property
+    const ITEM_LEVEL: vector<u8> = b"W_ITEM_LEVEL";
+    const ITEM_DEFAULT_STR: vector<u8> = b"W_ITEM_DEFAULT_STRENGTH";
 
     const ENOT_CREATOR:u64 = 1;
     const ESAME_MATERIAL:u64 = 2;
     const ENOT_IN_RECIPE:u64 = 3;
     const ENOT_IN_ACL: u64 = 4;
+    const EIS_TOP_LEVEL:u64 = 5;
 
     // property for game
 
@@ -213,7 +218,8 @@ module item_gen::item_generator {
                 break
             };
             i = i + 1;
-        };                                               
+        };                          
+        let default_str = utils::random_with_nonce(sender_address,5, 1) + 1;                     
         let token_data_id = token::create_tokendata(
                 &resource_signer,
                 string::utf8(ITEM_COLLECTION_NAME),
@@ -227,9 +233,9 @@ module item_gen::item_generator {
                 // we don't allow any mutation to the token
                 token::create_token_mutability_config(mutability_config),
                 // type
-                vector<String>[string::utf8(BURNABLE_BY_OWNER), string::utf8(BURNABLE_BY_CREATOR), string::utf8(TOKEN_PROPERTY_MUTABLE)],  // property_keys                
-                vector<vector<u8>>[bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true)],  // values 
-                vector<String>[string::utf8(b"bool"),string::utf8(b"bool"), string::utf8(b"bool")],
+                vector<String>[string::utf8(BURNABLE_BY_OWNER), string::utf8(BURNABLE_BY_CREATOR), string::utf8(TOKEN_PROPERTY_MUTABLE), string::utf8(ITEM_LEVEL), string::utf8(ITEM_DEFAULT_STR)],  // property_keys                
+                vector<vector<u8>>[bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true), bcs::to_bytes<bool>(&true),bcs::to_bytes<u64>(&16), bcs::to_bytes<u64>(&default_str)],  // values 
+                vector<String>[string::utf8(b"bool"),string::utf8(b"bool"), string::utf8(b"bool"),string::utf8(b"u64"), string::utf8(b"u64")],
         );
         let token_id = token::mint_token(&resource_signer, token_data_id, 1);
         token::opt_in_direct_transfer(sender, true);
@@ -252,5 +258,32 @@ module item_gen::item_generator {
         token::burn(sender, item_material_creator, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name_2, property_version, 1);
         
         mint_item(sender, minter_address, target_item, target_item_uri);        
+    }
+
+    entry fun item_enchant (
+        sender: &signer, contract_address:address,        
+        item_token_name:String, item_collectin_name:String, item_creator:address, item_property_version:u64
+    ) acquires ItemManager {    
+        let sender_address = signer::address_of(sender);
+        let resource_signer = get_resource_account_cap(contract_address);
+        let random = utils::random_with_nonce(sender_address, 10, 1) + 1;                     
+        let token_id = token::create_token_id_raw(item_creator, item_collectin_name, item_token_name, item_property_version);        
+        let pm = token::get_property_map(signer::address_of(sender), token_id);
+        let item_level = property_map::read_u64(&pm, &string::utf8(ITEM_LEVEL));
+        assert!(item_level > 1 , EIS_TOP_LEVEL);
+        if(random <= 6) {            
+            let token = token::withdraw_token(sender, token_id, 1);
+            token::deposit_token(&resource_signer, token);
+            token::burn(&resource_signer, item_creator, item_collectin_name, item_token_name, item_property_version, 1);                
+        } else {
+            token::mutate_one_token(            
+                &resource_signer,
+                sender_address,
+                token_id,            
+                vector<String>[string::utf8(ITEM_LEVEL)],  // property_keys                
+                vector<vector<u8>>[bcs::to_bytes<u64>(&(item_level -1) )],  // values 
+                vector<String>[string::utf8(b"u64")],      // type
+            );        
+        }        
     }        
 }
