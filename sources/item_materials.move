@@ -93,7 +93,7 @@ module item_gen::item_materials {
         acl::contains(&manager.acl, sender_addr)
     }
     // resource cab required 
-    entry fun init(sender: &signer,collection_uri: String,maximum_supply:u64) acquires ItemMaterialManager {
+    entry fun init(sender: &signer,collection_uri: String) acquires ItemMaterialManager {
         let sender_addr = signer::address_of(sender);                
         let (resource_signer, signer_cap) = account::create_resource_account(sender, x"02");    
         token::initialize_token_store(&resource_signer);
@@ -107,7 +107,7 @@ module item_gen::item_materials {
         let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
         token::create_collection(&resource_signer, 
             string::utf8(ITEM_MATERIAL_COLLECTION_NAME), 
-            string::utf8(COLLECTION_DESCRIPTION), collection_uri, maximum_supply, mutate_setting);        
+            string::utf8(COLLECTION_DESCRIPTION), collection_uri, 9999, mutate_setting);        
         let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);             
         acl::add(&mut manager.acl, sender_addr);
         event::emit_event(&mut manager.acl_events, AclAddEvent { 
@@ -158,7 +158,7 @@ module item_gen::item_materials {
         sender: &signer,         
         token_name: String,         
         description:String, 
-        collection_uri:String, max_amount:u64, amount:u64
+        collection_uri:String
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);
         let resource_signer = get_resource_account_cap(sender_address);                
@@ -173,7 +173,7 @@ module item_gen::item_materials {
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                max_amount, // 1 for NFT
+                9999, // 1 for NFT
                 collection_uri,
                 sender_address, // royalty fee to                
                 FEE_DENOMINATOR,
@@ -188,9 +188,9 @@ module item_gen::item_materials {
         } else {
             token_data_id = token::create_token_data_id(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME),token_name);                    
         };                     
-        let token_id = token::mint_token(&resource_signer, token_data_id, amount);
+        let token_id = token::mint_token(&resource_signer, token_data_id, 1);
         token::opt_in_direct_transfer(sender, true);
-        token::direct_transfer(&resource_signer, sender, token_id, amount);        
+        token::direct_transfer(&resource_signer, sender, token_id, 1);        
     }    
 }
 
