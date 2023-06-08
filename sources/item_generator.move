@@ -299,7 +299,7 @@ module item_gen::item_generator {
         item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemManager {    
         let sender_address = signer::address_of(sender);
-        let number = timestamp::now_seconds();
+        // let number = timestamp::now_seconds();
         let resource_signer = get_resource_account_cap(contract_address);
         let random = utils::random_with_nonce(sender_address, 10, 1) + 1;                     
         let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
