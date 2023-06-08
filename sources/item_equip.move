@@ -74,6 +74,7 @@ module item_gen::item_equip {
         let token = token::withdraw_token(&resource_signer, token_id_1, amount);
         token::deposit_token(sender, token);        
     }
+    
     entry fun admin_withdraw<CoinType>(sender: &signer, amount: u64) acquires ItemHolder {
         let sender_addr = signer::address_of(sender);
         let resource_signer = get_resource_account_cap(sender_addr);                                
