@@ -291,7 +291,7 @@ module item_gen::item_equip {
             item_reciept: reciept,            
         });
 
-        let new_fighter_id = create_fighter_id(new_fighter_token_name,new_fighter_collection_name,new_fighter_creator);        
+        let new_fighter_id = create_fighter_id(new_fighter_token_name, new_fighter_collection_name, new_fighter_creator);        
         table::add(&mut manager.holdings, new_fighter_id, reciept);
         event::emit_event(&mut manager.item_equip_events, ItemEquipEvent { 
             fighter_id: new_fighter_id,
