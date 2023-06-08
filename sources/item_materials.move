@@ -251,6 +251,14 @@ module item_gen::item_materials {
 
         let mutability_config = &vector<bool>[ true, true, false, true, true ];        
         let token_data_id;
+        if(!token::check_collection_exists(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME))) {
+            let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
+            let collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/elemental_essence.png");
+            token::create_collection(&resource_signer, 
+                string::utf8(ITEM_MATERIAL_COLLECTION_NAME), 
+                string::utf8(COLLECTION_DESCRIPTION), 
+                collection_uri, 9999, mutate_setting);        
+        };
         if(!token::check_tokendata_exists(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name)) {
             token_data_id = token::create_tokendata(
                 &resource_signer,
