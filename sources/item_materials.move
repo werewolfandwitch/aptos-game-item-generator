@@ -90,12 +90,12 @@ module item_gen::item_materials {
         account::create_signer_with_capability(&minter.signer_cap)
     }    
 
-    entry fun add_acl(sender: &signer, addr:address) acquires ItemMaterialManager  {                    
+    entry fun add_acl(sender: &signer, address_to_add:address) acquires ItemMaterialManager  {                    
         let sender_addr = signer::address_of(sender);                
         let manager = borrow_global_mut<ItemMaterialManager>(sender_addr);        
-        acl::add(&mut manager.acl, sender_addr);
+        acl::add(&mut manager.acl, address_to_add);
         event::emit_event(&mut manager.acl_events, AclAddEvent { 
-            added: addr,            
+            added: address_to_add,            
         });        
     }
 

@@ -132,12 +132,12 @@ module item_gen::item_generator {
         account::create_signer_with_capability(&minter.signer_cap)
     }    
 
-    entry fun add_acl(sender: &signer, addr:address) acquires ItemManager  {                    
+    entry fun add_acl(sender: &signer, address_to_add:address) acquires ItemManager  {                    
         let sender_addr = signer::address_of(sender);                
         let manager = borrow_global_mut<ItemManager>(sender_addr);        
-        acl::add(&mut manager.acl, sender_addr);
+        acl::add(&mut manager.acl, address_to_add);
         event::emit_event(&mut manager.acl_events, AclAddEvent { 
-            added: addr,            
+            added: address_to_add,            
         });        
     }
 
