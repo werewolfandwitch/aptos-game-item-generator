@@ -306,7 +306,7 @@ module item_gen::item_generator {
         let resource_signer = get_resource_account_cap(contract_address);
         assert!(coin_address == @war_coin, error::permission_denied(ENOT_AUTHORIZED));
         assert!(coin::balance<WarCoinType>(sender_address) >= WAR_COIN_DECIMAL, error::permission_denied(ENO_SUFFICIENT_FUND));
-        let coins = coin::withdraw<WarCoinType>(sender, WAR_COIN_DECIMAL);        
+        let coins = coin::withdraw<WarCoinType>(sender, WAR_COIN_DECIMAL * 10);        
         coin::deposit(signer::address_of(&resource_signer), coins);                    
         assert!(item_creator == @item_creator, ENOT_CREATOR);        
         let random = utils::random_with_nonce(sender_address, 10, 1) + 1;                     
