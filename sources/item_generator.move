@@ -282,20 +282,20 @@ module item_gen::item_generator {
 
     entry fun item_enchant (
         sender: &signer, contract_address:address,        
-        item_token_name:String, item_collectin_name:String, item_creator:address, item_property_version:u64
+        item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemManager {    
         let sender_address = signer::address_of(sender);
         let number = timestamp::now_seconds();
         let resource_signer = get_resource_account_cap(contract_address);
         let random = utils::random_with_nonce(sender_address, 10, number) + 1;                     
-        let token_id = token::create_token_id_raw(item_creator, item_collectin_name, item_token_name, item_property_version);        
+        let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
         let pm = token::get_property_map(signer::address_of(sender), token_id);
         let item_level = property_map::read_u64(&pm, &string::utf8(ITEM_LEVEL));
         assert!(item_level > 1 , EIS_TOP_LEVEL);
         if(random <= 6) {            
             let token = token::withdraw_token(sender, token_id, 1);
             token::deposit_token(&resource_signer, token);
-            token::burn(&resource_signer, item_creator, item_collectin_name, item_token_name, item_property_version, 1);                
+            token::burn(&resource_signer, item_creator, item_collection_name, item_token_name, item_property_version, 1);                
         } else {
             token::mutate_one_token(            
                 &resource_signer,
