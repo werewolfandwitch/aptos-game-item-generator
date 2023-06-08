@@ -8,6 +8,7 @@ module item_gen::utils {
 
     use aptos_framework::transaction_context;
     use aptos_framework::timestamp;
+    use aptos_std::type_info;
     use aptos_token::token::{Self, TokenId, TokenDataId};
         
     public fun average(a: u64, b: u64): u64 {
@@ -60,6 +61,11 @@ module item_gen::utils {
         };
         let random = from_bcs::to_u64(data) % max;
         random
+    }
+
+    public fun coin_address<CoinType>(): address {
+       let type_info = type_info::type_of<CoinType>();
+       type_info::account_address(&type_info)
     }
 
     public fun random_with_nonce(add:address, max:u64, nonce:u64):u64

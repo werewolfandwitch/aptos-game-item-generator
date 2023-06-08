@@ -1,5 +1,6 @@
 
 module item_gen::item_generator {        
+    use std::error;
     use std::bcs;
     use std::signer;    
     use std::string::{Self, String};    
@@ -19,6 +20,7 @@ module item_gen::item_generator {
     const TOKEN_PROPERTY_MUTABLE: vector<u8> = b"TOKEN_PROPERTY_MUTATBLE";    
 
     const FEE_DENOMINATOR: u64 = 100000;
+    const WAR_COIN_DECIMAL:u64 = 100000000;   
 
     
     // collection name / info
@@ -34,6 +36,8 @@ module item_gen::item_generator {
     const ENOT_IN_RECIPE:u64 = 3;
     const ENOT_IN_ACL: u64 = 4;
     const EIS_TOP_LEVEL:u64 = 5;
+    const ENOT_AUTHORIZED:u64 = 6;
+    const ENO_SUFFICIENT_FUND:u64 = 7;
 
     // property for game
 
@@ -293,13 +297,18 @@ module item_gen::item_generator {
         mint_item(sender, minter_address, target_item, target_item_uri);        
     }
 
-    entry fun item_enchant (
+    entry fun item_enchant<WarCoinType> (
         sender: &signer, contract_address:address,        
         item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemManager {    
+        let coin_address = utils::coin_address<WarCoinType>();
         let sender_address = signer::address_of(sender);
-        assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);
+        assert!(coin_address == @war_coin, error::permission_denied(ENOT_AUTHORIZED));
+        assert!(coin::balance<WarCoinType>(sender_address) >= WAR_COIN_DECIMAL, error::permission_denied(ENO_SUFFICIENT_FUND));
+        let coins = coin::withdraw<WarCoinType>(sender, WAR_COIN_DECIMAL);        
+        coin::deposit(signer::address_of(&resource_signer), coins);                    
+        assert!(item_creator == @item_creator, ENOT_CREATOR);        
         let random = utils::random_with_nonce(sender_address, 10, 1) + 1;                     
         let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
         let pm = token::get_property_map(signer::address_of(sender), token_id);
