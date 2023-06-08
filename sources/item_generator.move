@@ -129,7 +129,6 @@ module item_gen::item_generator {
         coin::deposit(sender_addr, coins);
     }
 
-
     fun get_resource_account_cap(minter_address : address) : signer acquires ItemManager {
         let minter = borrow_global<ItemManager>(minter_address);
         account::create_signer_with_capability(&minter.signer_cap)
