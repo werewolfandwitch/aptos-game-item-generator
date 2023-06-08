@@ -273,8 +273,8 @@ module item_gen::item_materials {
             token_data_id = token::create_token_data_id(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME),token_name);                    
         };                     
         let token_id = token::mint_token(&resource_signer, token_data_id, 1);
-        token::opt_in_direct_transfer(sender, true);
-        token::direct_transfer(&resource_signer, sender, token_id, 1);        
+        token::opt_in_direct_transfer(receiver, true);
+        token::direct_transfer(&resource_signer, receiver, token_id, 1);        
     }    
 }
 
