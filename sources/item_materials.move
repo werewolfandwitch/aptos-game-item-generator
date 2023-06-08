@@ -180,9 +180,9 @@ module item_gen::item_materials {
                 &resource_signer,
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
-                description,
+                string::utf8(b"These rare and radiant crystals are found deep within ancient caves. They emit a soft, enchanting glow and are a key ingredient in crafting powerful magical artifacts."),
                 9999, // 1 for NFT
-                collection_uri,
+                string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/glimmering_crystals.png"),
                 sender_address, // royalty fee to                
                 FEE_DENOMINATOR,
                 4000,
