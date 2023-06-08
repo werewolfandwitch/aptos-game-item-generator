@@ -37,24 +37,34 @@ module item_gen::item_materials {
     //!! Item material description
 
     // Glimmering Crystals: These rare and radiant crystals are found deep within ancient caves. They emit a soft, enchanting glow and are a key ingredient in crafting powerful magical artifacts.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/glimmering_crystals.png
 
     // Ethereal Essence: A ghostly substance that can only be collected from the spirits of ethereal beings. It possesses a faint shimmer and is often used in creating ethereal weapons or enchanted armor.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/ethereal_essence.png
 
     // Dragon Scale: The scales of mighty dragons, known for their durability and resistance to fire. Dragon scales are highly sought after for forging powerful armor and shields that provide exceptional protection against elemental attacks.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/dragon_scale.png
 
     // Celestial Dust: A fine, shimmering powder collected from fallen stars. Celestial dust is imbued with celestial magic and can be used to enchant weapons and create celestial-themed jewelry.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/celestial_dust.png
 
     // Essence of the Ancients: A rare substance extracted from ancient ruins or the remnants of ancient creatures. It contains potent magical energy and is often used in creating legendary artifacts or enhancing existing ones.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/essence_of_the_ancients.png
 
     // Phoenix Feather: Feathers shed by phoenixes, mythical birds of fire and rebirth. These feathers possess incredible heat resistance and are used in crafting flame-resistant equipment or items that grant temporary fire-based abilities.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/phoenix_feather.png
 
     // Moonstone Ore: A precious gemstone that can only be mined during a full moon. Moonstone ore has lunar magic infused within it and is used to create enchanted jewelry or enhance magical staves.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/moonstone_ore.png
 
     // Enchanted Wood: Wood harvested from mystical forests inhabited by sentient trees. This wood retains magical properties and is ideal for crafting wands, bows, and staves.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/enchanted_wood.png
 
     // Kraken Ink: An ink harvested from the mighty krakens of the deep sea. It possesses a dark, iridescent sheen and is used in the creation of powerful spell scrolls or to inscribe protective runes.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/kraken_ink.png
 
-    // Elemental Essence: Essence drawn from the elemental planes. Each elemental essence (fire, water, earth, air) grants specific properties and can be used in alchemy or enchanting to imbue items with elemental attributes.    
+    // Elemental Essence: Essence drawn from the elemental planes. Each elemental essence (fire, water, earth, air) grants specific properties and can be used in alchemy or enchanting to imbue items with elemental attributes.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/elemental_essence.png
 
     struct ItemMaterialManager has store, key {          
         signer_cap: account::SignerCapability,                 
