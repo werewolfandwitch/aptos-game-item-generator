@@ -220,7 +220,8 @@ module item_gen::item_equip {
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
         let auth_address = signer::address_of(auth);     
-        assert!(is_in_acl(auth_address), ENOT_IN_ACL);
+        let manager = borrow_global<ItemHolder>(contract_address);             
+        acl::assert_contains(&manager.acl, auth_address);                        
         assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
