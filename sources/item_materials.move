@@ -181,7 +181,7 @@ module item_gen::item_materials {
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                99999, // 1 for NFT
+                99999,
                 collection_uri,
                 item_material_contract, // royalty fee to                
                 FEE_DENOMINATOR,
@@ -256,7 +256,7 @@ module item_gen::item_materials {
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                1, // 1 for NFT
+                99999, // 1 for NFT
                 collection_uri,
                 item_material_contract, // royalty fee to                
                 FEE_DENOMINATOR,
