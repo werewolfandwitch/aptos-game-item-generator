@@ -129,7 +129,6 @@ module item_gen::item_generator {
         coin::deposit(sender_addr, coins);
     }
 
-
     fun get_resource_account_cap(minter_address : address) : signer acquires ItemManager {
         let minter = borrow_global<ItemManager>(minter_address);
         account::create_signer_with_capability(&minter.signer_cap)
@@ -311,7 +310,7 @@ module item_gen::item_generator {
         assert!(item_creator == @item_creator, ENOT_CREATOR);        
         let random = utils::random_with_nonce(sender_address, 10, 1) + 1;                     
         let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
-        let pm = token::get_property_map(signer::address_of(sender), token_id);
+        let pm = token::get_property_map(sender_address, token_id);
         let item_level = property_map::read_u64(&pm, &string::utf8(ITEM_LEVEL));
         assert!(item_level > 1 , EIS_TOP_LEVEL);
         if(random <= 6) {            

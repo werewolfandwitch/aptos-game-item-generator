@@ -184,16 +184,15 @@ module item_gen::item_equip {
 
 
         
-    // TODO should be changeg to public function
-    // public fun swap_owner(
+    // admin only
     entry fun swap_owner_entry(
-        _sender: &signer, contract_address:address,
+        sender: &signer, contract_address:address,
         fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
         owner: address, item_token_name:String, item_collection_name:String, item_creator:address,
         new_fighter_token_name: String, new_fighter_collection_name:String, new_fighter_creator:address,
     ) acquires ItemHolder {
-         // let sender_address = signer::address_of(sender);     
-        assert!(is_in_acl(contract_address), ENOT_IN_ACL);                                   
+        let sender_address = signer::address_of(sender);     
+        assert!(is_in_acl(sender_address), ENOT_IN_ACL);                                   
         assert!(item_creator == @item_creator, ENOT_CREATOR);
         let fighter_id = create_fighter_id(fighter_token_name, fighter_collection_name, fighter_creator);
         let reciept = create_item_reciept(owner, item_token_name,item_collection_name, item_creator);
@@ -215,12 +214,13 @@ module item_gen::item_equip {
     }
 
     public fun item_equip (
-        sender: &signer, contract_address:address,
+        sender: &signer, auth: &signer, contract_address:address,
         fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
         item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
-        assert!(is_in_acl(contract_address), ENOT_IN_ACL);
+        let auth_address = signer::address_of(auth);     
+        assert!(is_in_acl(auth_address), ENOT_IN_ACL);
         assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
@@ -241,12 +241,13 @@ module item_gen::item_equip {
     }
 
     public fun item_unequip (
-        sender: &signer, contract_address:address,
+        sender: &signer, auth: &signer, contract_address: address,
         fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
         item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
-        assert!(is_in_acl(contract_address), ENOT_IN_ACL);        
+        let auth_address = signer::address_of(auth);     
+        assert!(is_in_acl(auth_address), ENOT_IN_ACL);        
         assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
@@ -268,13 +269,14 @@ module item_gen::item_equip {
     }
 
     public fun swap_owner(
-        sender: &signer, contract_address:address,
+        sender: &signer, auth: &signer, contract_address:address,
         fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
         item_token_name:String, item_collection_name:String, item_creator:address,
         new_fighter_token_name: String, new_fighter_collection_name:String, new_fighter_creator:address,
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
-        assert!(is_in_acl(contract_address), ENOT_IN_ACL);                                   
+        let auth_address = signer::address_of(auth);     
+        assert!(is_in_acl(auth_address), ENOT_IN_ACL);                                   
 
         let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
         let reciept = create_item_reciept(sender_address, item_token_name,item_collection_name, item_creator);
