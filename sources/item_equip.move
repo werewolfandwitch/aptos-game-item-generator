@@ -27,14 +27,14 @@ module item_gen::item_equip {
 
     struct FighterId has store, copy, drop {        
         fighter_token_name:String,
-        fighter_collectin_name: String,
+        fighter_collection_name: String,
         fighter_creator: address
     }    
 
     struct ItemReciept has store, copy, drop {
         owner: address,
         item_token_name:String,
-        item_collectin_name:String,
+        item_collection_name:String,
         item_creator:address
     }    
 
@@ -50,19 +50,19 @@ module item_gen::item_equip {
 
     fun create_fighter_id(
         fighter_token_name:String,
-        fighter_collectin_name: String,
+        fighter_collection_name: String,
         fighter_creator: address     
     ): FighterId {        
-        FighterId { fighter_token_name, fighter_collectin_name,fighter_creator }
+        FighterId { fighter_token_name, fighter_collection_name,fighter_creator }
     }
 
     fun create_item_reciept(
         owner: address,
         item_token_name:String,
-        item_collectin_name:String,
+        item_collection_name:String,
         item_creator:address  
     ): ItemReciept {        
-        ItemReciept { owner, item_token_name, item_collectin_name, item_creator}
+        ItemReciept { owner, item_token_name, item_collection_name, item_creator}
     }    
     
     entry fun admin_withdraw_items(sender: &signer, creator:address, collection:String, name:String, property_version:u64, 
@@ -114,20 +114,20 @@ module item_gen::item_equip {
     // sender address should be season contract address for authorization
     entry fun item_equip_entry (
         sender: &signer, contract_address:address,
-        fighter_token_name: String, fighter_collectin_name:String, fighter_creator:address,
-        owner: address, item_token_name:String, item_collectin_name:String, item_creator:address, item_property_version:u64
+        fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
+        owner: address, item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
-        let fighter_id = create_fighter_id(fighter_token_name,fighter_collectin_name,fighter_creator);
-        let reciept = create_item_reciept(owner, item_token_name,item_collectin_name,item_creator);
+        let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
+        let reciept = create_item_reciept(owner, item_token_name,item_collection_name,item_creator);
         
         let manager = borrow_global_mut<ItemHolder>(contract_address);        
         table::add(&mut manager.holdings, fighter_id, reciept);
 
-        let token_id = token::create_token_id_raw(item_creator, item_collectin_name, item_token_name, item_property_version);        
+        let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
         let token = token::withdraw_token(sender, token_id, 1);
         token::deposit_token(&resource_signer, token);
 
@@ -139,19 +139,19 @@ module item_gen::item_equip {
 
     entry fun item_unequip_entry (
         sender: &signer, contract_address:address,
-        fighter_token_name: String, fighter_collectin_name:String, fighter_creator:address,
-        owner: address, item_token_name:String, item_collectin_name:String, item_creator:address, item_property_version:u64
+        fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
+        owner: address, item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);        
         let resource_signer = get_resource_account_cap(contract_address);                        
 
-        let fighter_id = create_fighter_id(fighter_token_name,fighter_collectin_name,fighter_creator);
-        let reciept = create_item_reciept(owner, item_token_name,item_collectin_name,item_creator);
+        let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
+        let reciept = create_item_reciept(owner, item_token_name,item_collection_name,item_creator);
         
         let manager = borrow_global_mut<ItemHolder>(contract_address);        
         table::remove(&mut manager.holdings, fighter_id);
-        let token_id = token::create_token_id_raw(item_creator, item_collectin_name, item_token_name, item_property_version);        
+        let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
         let token = token::withdraw_token(&resource_signer, token_id, 1);
         token::deposit_token(sender, token);
         
@@ -167,15 +167,15 @@ module item_gen::item_equip {
     // public fun swap_owner(
     entry fun swap_owner_entry(
         sender: &signer, contract_address:address,
-        fighter_token_name: String, fighter_collectin_name:String, fighter_creator:address,
-        owner: address, item_token_name:String, item_collectin_name:String, item_creator:address,
-        new_fighter_token_name: String, new_fighter_collectin_name:String, new_fighter_creator:address,
+        fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
+        owner: address, item_token_name:String, item_collection_name:String, item_creator:address,
+        new_fighter_token_name: String, new_fighter_collection_name:String, new_fighter_creator:address,
     ) acquires ItemHolder {
          let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);                                   
 
-        let fighter_id = create_fighter_id(fighter_token_name, fighter_collectin_name, fighter_creator);
-        let reciept = create_item_reciept(owner, item_token_name,item_collectin_name, item_creator);
+        let fighter_id = create_fighter_id(fighter_token_name, fighter_collection_name, fighter_creator);
+        let reciept = create_item_reciept(owner, item_token_name,item_collection_name, item_creator);
                 
         let manager = borrow_global_mut<ItemHolder>(contract_address);        
         table::remove(&mut manager.holdings, fighter_id);
@@ -185,7 +185,7 @@ module item_gen::item_equip {
             item_reciept: reciept,            
         });
 
-        let new_fighter_id = create_fighter_id(new_fighter_token_name,new_fighter_collectin_name,new_fighter_creator);        
+        let new_fighter_id = create_fighter_id(new_fighter_token_name,new_fighter_collection_name,new_fighter_creator);        
         table::add(&mut manager.holdings, fighter_id, reciept);
         event::emit_event(&mut manager.item_equip_events, ItemEquipEvent { 
             fighter_id: new_fighter_id,
@@ -195,20 +195,20 @@ module item_gen::item_equip {
 
     public fun item_equip (
         sender: &signer, contract_address:address,
-        fighter_token_name: String, fighter_collectin_name:String, fighter_creator:address,
-        owner: address, item_token_name:String, item_collectin_name:String, item_creator:address, item_property_version:u64
+        fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
+        owner: address, item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
-        let fighter_id = create_fighter_id(fighter_token_name,fighter_collectin_name,fighter_creator);
-        let reciept = create_item_reciept(owner, item_token_name,item_collectin_name,item_creator);
+        let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
+        let reciept = create_item_reciept(owner, item_token_name,item_collection_name,item_creator);
         
         let manager = borrow_global_mut<ItemHolder>(contract_address);        
         table::add(&mut manager.holdings, fighter_id, reciept);
 
-        let token_id = token::create_token_id_raw(item_creator, item_collectin_name, item_token_name, item_property_version);        
+        let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
         let token = token::withdraw_token(sender, token_id, 1);
         token::deposit_token(&resource_signer, token);
 
@@ -220,19 +220,19 @@ module item_gen::item_equip {
 
     public fun item_unequip (
         sender: &signer, contract_address:address,
-        fighter_token_name: String, fighter_collectin_name:String, fighter_creator:address,
-        owner: address, item_token_name:String, item_collectin_name:String, item_creator:address, item_property_version:u64
+        fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
+        owner: address, item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);        
         let resource_signer = get_resource_account_cap(contract_address);                        
 
-        let fighter_id = create_fighter_id(fighter_token_name,fighter_collectin_name,fighter_creator);
-        let reciept = create_item_reciept(owner, item_token_name,item_collectin_name,item_creator);
+        let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
+        let reciept = create_item_reciept(owner, item_token_name,item_collection_name,item_creator);
         
         let manager = borrow_global_mut<ItemHolder>(contract_address);        
         table::remove(&mut manager.holdings, fighter_id);
-        let token_id = token::create_token_id_raw(item_creator, item_collectin_name, item_token_name, item_property_version);        
+        let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
         let token = token::withdraw_token(&resource_signer, token_id, 1);
         token::deposit_token(sender, token);
         
@@ -244,15 +244,15 @@ module item_gen::item_equip {
 
     public fun swap_owner(
         sender: &signer, contract_address:address,
-        fighter_token_name: String, fighter_collectin_name:String, fighter_creator:address,
-        owner: address, item_token_name:String, item_collectin_name:String, item_creator:address,
-        new_fighter_token_name: String, new_fighter_collectin_name:String, new_fighter_creator:address,
+        fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
+        owner: address, item_token_name:String, item_collection_name:String, item_creator:address,
+        new_fighter_token_name: String, new_fighter_collection_name:String, new_fighter_creator:address,
     ) acquires ItemHolder {
          let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);                                   
 
-        let fighter_id = create_fighter_id(fighter_token_name,fighter_collectin_name,fighter_creator);
-        let reciept = create_item_reciept(owner, item_token_name,item_collectin_name, item_creator);
+        let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
+        let reciept = create_item_reciept(owner, item_token_name,item_collection_name, item_creator);
                 
         let manager = borrow_global_mut<ItemHolder>(contract_address);        
         table::remove(&mut manager.holdings, fighter_id);
@@ -262,7 +262,7 @@ module item_gen::item_equip {
             item_reciept: reciept,            
         });
 
-        let new_fighter_id = create_fighter_id(new_fighter_token_name,new_fighter_collectin_name,new_fighter_creator);        
+        let new_fighter_id = create_fighter_id(new_fighter_token_name,new_fighter_collection_name,new_fighter_creator);        
         table::add(&mut manager.holdings, fighter_id, reciept);
         event::emit_event(&mut manager.item_equip_events, ItemEquipEvent { 
             fighter_id: new_fighter_id,
