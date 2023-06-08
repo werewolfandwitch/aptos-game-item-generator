@@ -1,8 +1,4 @@
-
-
-## WIP. Do not use it until it done
-
-# Item generator
+# Werewolf and witch Aptos move Item generator
 
 - Werwolf and witch [werewolfandwitch.xyz](https://werewolfandwitch.xyz/)
 - Item management and item generator by move smart contract
