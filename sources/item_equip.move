@@ -19,6 +19,7 @@ module item_gen::item_equip {
     const ENOT_IN_ACL: u64 = 3;
     const EIS_TOP_LEVEL: u64 = 4;
     const ENOT_CREATOR:u64 = 5;
+    const ENOT_OWNER:u64 = 6;
     
     struct ItemHolder has store, key {          
         signer_cap: account::SignerCapability,
@@ -244,7 +245,7 @@ module item_gen::item_equip {
         fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
         owner: address, item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemHolder {
-        // let sender_address = signer::address_of(sender);     
+        let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(contract_address), ENOT_IN_ACL);        
         assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);                        
@@ -252,7 +253,9 @@ module item_gen::item_equip {
         let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
         let reciept = create_item_reciept(owner, item_token_name,item_collection_name,item_creator);
         
-        let manager = borrow_global_mut<ItemHolder>(contract_address);        
+        let manager = borrow_global_mut<ItemHolder>(contract_address);
+        let item_reciept = table::borrow(&manager.holdings, fighter_id);
+        assert!(sender_address == item_reciept.owner, ENOT_OWNER);
         table::remove(&mut manager.holdings, fighter_id);
         let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
         let token = token::withdraw_token(&resource_signer, token_id, 1);
