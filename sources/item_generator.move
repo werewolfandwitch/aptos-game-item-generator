@@ -301,7 +301,7 @@ module item_gen::item_generator {
         let sender_address = signer::address_of(sender);
         let number = timestamp::now_seconds();
         let resource_signer = get_resource_account_cap(contract_address);
-        let random = utils::random_with_nonce(sender_address, 10, number) + 1;                     
+        let random = utils::random_with_nonce(sender_address, 10, 1) + 1;                     
         let token_id = token::create_token_id_raw(item_creator, item_collection_name, item_token_name, item_property_version);        
         let pm = token::get_property_map(signer::address_of(sender), token_id);
         let item_level = property_map::read_u64(&pm, &string::utf8(ITEM_LEVEL));
