@@ -128,9 +128,7 @@ module item_gen::item_materials {
 
     entry fun mint_item_material_admin (
         sender: &signer,         
-        token_name: String,         
-        description:String, 
-        collection_uri:String, max_amount:u64, amount:u64
+        token_name: String,
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);
         let resource_signer = get_resource_account_cap(sender_address);                
@@ -139,13 +137,49 @@ module item_gen::item_materials {
         acl::assert_contains(&manager.acl,sender_address);                
         let mutability_config = &vector<bool>[ true, true, false, true, true ];        
         let token_data_id;
+        let description;
+        let collection_uri;
+        if(token_name == string::utf8(b"Glimmering Crystals")) {
+            description = string::utf8(b"These rare and radiant crystals are found deep within ancient caves. They emit a soft, enchanting glow and are a key ingredient in crafting powerful magical artifacts.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/glimmering_crystals.png");
+        } else if (token_name == string::utf8(b"Ethereal Essence")) {
+            description = string::utf8(b"A ghostly substance that can only be collected from the spirits of ethereal beings. It possesses a faint shimmer and is often used in creating ethereal weapons or enchanted armor.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/ethereal_essence.png");
+        } else if (token_name == string::utf8(b"Dragon Scale")) {
+            description = string::utf8(b"The scales of mighty dragons, known for their durability and resistance to fire. Dragon scales are highly sought after for forging powerful armor and shields that provide exceptional protection against elemental attacks.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/dragon_scale.png");
+        } else if (token_name == string::utf8(b"Celestial Dust")) {
+            description = string::utf8(b"A fine, shimmering powder collected from fallen stars. Celestial dust is imbued with celestial magic and can be used to enchant weapons and create celestial-themed jewelry.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/celestial_dust.png");
+        } else if (token_name == string::utf8(b"Essence of the Ancients")) {
+            description = string::utf8(b"A rare substance extracted from ancient ruins or the remnants of ancient creatures. It contains potent magical energy and is often used in creating legendary artifacts or enhancing existing ones.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/essence_of_the_ancients.png");
+        } else if (token_name == string::utf8(b"Phoenix Feather")) {
+            description = string::utf8(b"Feathers shed by phoenixes, mythical birds of fire and rebirth. These feathers possess incredible heat resistance and are used in crafting flame-resistant equipment or items that grant temporary fire-based abilities.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/phoenix_feather.png");
+        } else if (token_name == string::utf8(b"Moonstone Ore")) {
+            description = string::utf8(b"A precious gemstone that can only be mined during a full moon. Moonstone ore has lunar magic infused within it and is used to create enchanted jewelry or enhance magical staves.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/moonstone_ore.png");    
+        } else if (token_name == string::utf8(b"Enchanted Wood")) {
+            description = string::utf8(b"Wood harvested from mystical forests inhabited by sentient trees. This wood retains magical properties and is ideal for crafting wands, bows, and staves.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/enchanted_wood.png");
+        } else if (token_name == string::utf8(b"Kraken Ink")) {
+            description = string::utf8(b"An ink harvested from the mighty krakens of the deep sea. It possesses a dark, iridescent sheen and is used in the creation of powerful spell scrolls or to inscribe protective runes.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/kraken_ink.png");
+        } else if (token_name == string::utf8(b"Elemental Essence")) {            
+            description = string::utf8(b"Essence drawn from the elemental planes. Each elemental essence (fire, water, earth, air) grants specific properties and can be used in alchemy or enchanting to imbue items with elemental attributes.");
+            collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-material-image/elemental_essence.png");
+        } else {
+            description = string::utf8(b"No Item");
+            collection_uri = string::utf8(b"No item");
+        };
         if(!token::check_tokendata_exists(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name)) {
             token_data_id = token::create_tokendata(
                 &resource_signer,
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                max_amount, // 1 for NFT
+                1, // 1 for NFT
                 collection_uri,
                 sender_address, // royalty fee to                
                 FEE_DENOMINATOR,
@@ -160,9 +194,9 @@ module item_gen::item_materials {
         } else {
             token_data_id = token::create_token_data_id(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME),token_name);                    
         };                     
-        let token_id = token::mint_token(&resource_signer, token_data_id, amount);
+        let token_id = token::mint_token(&resource_signer, token_data_id, 1);
         token::opt_in_direct_transfer(sender, true);
-        token::direct_transfer(&resource_signer, sender, token_id, amount);        
+        token::direct_transfer(&resource_signer, sender, token_id, 1);        
     }
 
     public fun mint_item_material (
@@ -219,7 +253,7 @@ module item_gen::item_materials {
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                9999, // 1 for NFT
+                1, // 1 for NFT
                 collection_uri,
                 sender_address, // royalty fee to                
                 FEE_DENOMINATOR,
