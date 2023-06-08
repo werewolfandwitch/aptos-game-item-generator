@@ -238,7 +238,7 @@ module item_gen::item_equip {
         fighter_token_name: String, fighter_collection_name:String, fighter_creator:address,
         owner: address, item_token_name:String, item_collection_name:String, item_creator:address, item_property_version:u64
     ) acquires ItemHolder {
-        let sender_address = signer::address_of(sender);     
+        // let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(contract_address), ENOT_IN_ACL);        
         let resource_signer = get_resource_account_cap(contract_address);                        
 
@@ -263,7 +263,7 @@ module item_gen::item_equip {
         owner: address, item_token_name:String, item_collection_name:String, item_creator:address,
         new_fighter_token_name: String, new_fighter_collection_name:String, new_fighter_creator:address,
     ) acquires ItemHolder {
-         let sender_address = signer::address_of(sender);     
+         // let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(contract_address), ENOT_IN_ACL);                                   
 
         let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);

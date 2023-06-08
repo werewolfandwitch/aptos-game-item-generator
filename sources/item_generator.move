@@ -12,8 +12,7 @@ module item_gen::item_generator {
     use std::vector;
     use aptos_framework::account;    
     use item_gen::utils;
-    use item_gen::acl::{Self};
-    use aptos_framework::timestamp;
+    use item_gen::acl::{Self};    
 
     const BURNABLE_BY_CREATOR: vector<u8> = b"TOKEN_BURNABLE_BY_CREATOR";    
     const BURNABLE_BY_OWNER: vector<u8> = b"TOKEN_BURNABLE_BY_OWNER";
