@@ -280,6 +280,8 @@ module item_gen::item_equip {
         let reciept = create_item_reciept(sender_address, item_token_name,item_collection_name, item_creator);
                 
         let manager = borrow_global_mut<ItemHolder>(contract_address);        
+        let item_reciept = table::borrow(&manager.holdings, fighter_id);
+        assert!(sender_address == item_reciept.owner, ENOT_OWNER);
         table::remove(&mut manager.holdings, fighter_id);
 
         event::emit_event(&mut manager.item_unequip_events, ItemUnEquipEvent { 
@@ -288,7 +290,7 @@ module item_gen::item_equip {
         });
 
         let new_fighter_id = create_fighter_id(new_fighter_token_name,new_fighter_collection_name,new_fighter_creator);        
-        table::add(&mut manager.holdings, fighter_id, reciept);
+        table::add(&mut manager.holdings, new_fighter_id, reciept);
         event::emit_event(&mut manager.item_equip_events, ItemEquipEvent { 
             fighter_id: new_fighter_id,
             item_reciept: reciept,            
