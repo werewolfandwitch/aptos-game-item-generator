@@ -202,15 +202,16 @@ module item_gen::item_materials {
     }
 
     public fun mint_item_material (
-        sender: &signer,   
+        receiver: &signer,
+        auth: &signer,   
         item_material_contract:address,      
         token_name: String,
     ) acquires ItemMaterialManager {             
-        // let sender_address = signer::address_of(sender);
+        let auth_address = signer::address_of(auth);
         let resource_signer = get_resource_account_cap(item_material_contract);                
         let resource_account_address = signer::address_of(&resource_signer);     
         let manager = borrow_global<ItemMaterialManager>(item_material_contract);             
-        acl::assert_contains(&manager.acl, item_material_contract);                        
+        acl::assert_contains(&manager.acl, auth_address);                        
         let description;
         let collection_uri;
         if(token_name == string::utf8(b"Glimmering Crystals")) {
