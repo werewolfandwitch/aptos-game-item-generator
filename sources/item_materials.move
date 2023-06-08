@@ -132,10 +132,10 @@ module item_gen::item_materials {
         token_name: String,
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);
-        let resource_signer = get_resource_account_cap(item_material_contract);                
+        let resource_signer = get_resource_account_cap(sender_address);                
         let resource_account_address = signer::address_of(&resource_signer);     
-        let manager = borrow_global<ItemMaterialManager>(item_material_contract);             
-        acl::assert_contains(&manager.acl,item_material_contract);                
+        let manager = borrow_global<ItemMaterialManager>(sender_address);             
+        acl::assert_contains(&manager.acl,sender_address);                
         //         let mutability_config = &vector<bool>[ false, true, true, true, true ];
         let mutability_config = &vector<bool>[ true, true, false, true, true ];        
         let token_data_id;
