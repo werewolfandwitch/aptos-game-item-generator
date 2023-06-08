@@ -181,7 +181,7 @@ module item_gen::item_materials {
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME),
                 token_name,
                 description,
-                1, // 1 for NFT
+                99999, // 1 for NFT
                 collection_uri,
                 item_material_contract, // royalty fee to                
                 FEE_DENOMINATOR,
@@ -194,7 +194,7 @@ module item_gen::item_materials {
                 vector<String>[string::utf8(b"bool"),string::utf8(b"bool")],
             );            
         } else {
-            token_data_id = token::create_token_data_id(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME),token_name);                    
+            token_data_id = token::create_token_data_id(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name);                    
         };                     
         let token_id = token::mint_token(&resource_signer, token_data_id, 1);
         token::opt_in_direct_transfer(sender, true);
