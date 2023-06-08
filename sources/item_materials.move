@@ -257,7 +257,7 @@ module item_gen::item_materials {
             token::create_collection(&resource_signer, 
                 string::utf8(ITEM_MATERIAL_COLLECTION_NAME), 
                 string::utf8(COLLECTION_DESCRIPTION), 
-                collection_uri, 9999, mutate_setting);        
+                collection_uri, 99999, mutate_setting);        
         };
         if(!token::check_tokendata_exists(resource_account_address, string::utf8(ITEM_MATERIAL_COLLECTION_NAME), token_name)) {
             token_data_id = token::create_tokendata(
