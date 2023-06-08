@@ -23,6 +23,11 @@ module item_gen::item_equip {
         holdings: Table<FighterId, ItemReciept>,
         item_equip_events:EventHandle<ItemEquipEvent>,
         item_unequip_events:EventHandle<ItemUnEquipEvent>,
+        acl_events:EventHandle<AclAddEvent>,                                   
+    }
+
+    struct AclAddEvent has drop, store {
+        added: address,        
     }
 
     struct FighterId has store, copy, drop {        
@@ -87,6 +92,15 @@ module item_gen::item_equip {
         account::create_signer_with_capability(&minter.signer_cap)
     }    
 
+    entry fun add_acl(sender: &signer, addr:address) acquires ItemHolder  {                    
+        let sender_addr = signer::address_of(sender);                
+        let manager = borrow_global_mut<ItemHolder>(sender_addr);        
+        acl::add(&mut manager.acl, sender_addr);
+        event::emit_event(&mut manager.acl_events, AclAddEvent { 
+            added: addr,            
+        });        
+    }
+
     fun is_in_acl(sender_addr:address) : bool acquires ItemHolder {
         let manager = borrow_global<ItemHolder>(sender_addr);
         let acl = manager.acl;        
@@ -104,6 +118,7 @@ module item_gen::item_equip {
                 holdings: table::new(),
                 item_equip_events: account::new_event_handle<ItemEquipEvent>(sender),
                 item_unequip_events:account::new_event_handle<ItemUnEquipEvent>(sender),
+                acl_events:account::new_event_handle<AclAddEvent>(sender)
             });
         };                
         let manager = borrow_global_mut<ItemHolder>(sender_addr);

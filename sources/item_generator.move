@@ -81,7 +81,11 @@ module item_gen::item_generator {
     struct Recipes has key {
         recipes: Table<String, ItemComposition>, // <Name of Item, Item Composition>
         recipe_add_events:EventHandle<ItemRecipeAdded>,
-        recipe_check_events:EventHandle<ItemRecipeCheck>,
+        recipe_check_events:EventHandle<ItemRecipeCheck>,        
+    }
+
+    struct AclAddEvent has drop, store {
+        added: address,        
     }
 
     struct ItemRecipeAdded has drop, store {
@@ -102,7 +106,8 @@ module item_gen::item_generator {
 
     struct ItemManager has store, key {          
         signer_cap: account::SignerCapability,
-        acl: acl::ACL                                   
+        acl: acl::ACL,
+        acl_events:EventHandle<AclAddEvent>,                                   
     } 
 
     struct ItemEvents has key {
@@ -127,6 +132,15 @@ module item_gen::item_generator {
         account::create_signer_with_capability(&minter.signer_cap)
     }    
 
+    entry fun add_acl(sender: &signer, addr:address) acquires ItemManager  {                    
+        let sender_addr = signer::address_of(sender);                
+        let manager = borrow_global_mut<ItemManager>(sender_addr);        
+        acl::add(&mut manager.acl, sender_addr);
+        event::emit_event(&mut manager.acl_events, AclAddEvent { 
+            added: addr,            
+        });        
+    }
+
     fun is_in_acl(sender_addr:address) : bool acquires ItemManager {
         let manager = borrow_global<ItemManager>(sender_addr);
         let acl = manager.acl;        
@@ -141,7 +155,7 @@ module item_gen::item_generator {
             move_to(sender, ItemManager {                
                 signer_cap,  
                 acl: acl::empty(),
-                
+                acl_events:account::new_event_handle<AclAddEvent>(sender)
             });
         };
 
