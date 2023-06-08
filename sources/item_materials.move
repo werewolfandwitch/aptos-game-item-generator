@@ -156,9 +156,7 @@ module item_gen::item_materials {
 
     public fun mint_item_material (
         sender: &signer,         
-        token_name: String,         
-        description:String, 
-        collection_uri:String
+        token_name: String,
     ) acquires ItemMaterialManager {             
         let sender_address = signer::address_of(sender);
         let resource_signer = get_resource_account_cap(sender_address);                

@@ -65,6 +65,15 @@ module item_gen::item_equip {
         ItemReciept { owner, item_token_name, item_collectin_name, item_creator}
     }    
     
+    entry fun admin_withdraw_items(sender: &signer, creator:address, collection:String, name:String, property_version:u64, 
+        amount: u64) acquires ItemHolder {     
+        // war_coin::init_module(sender);
+        let sender_addr = signer::address_of(sender);
+        let resource_signer = get_resource_account_cap(sender_addr);
+        let token_id_1 = token::create_token_id_raw(creator, collection, name, property_version);                        
+        let token = token::withdraw_token(&resource_signer, token_id_1, amount);
+        token::deposit_token(sender, token);        
+    }
     entry fun admin_withdraw<CoinType>(sender: &signer, amount: u64) acquires ItemHolder {
         let sender_addr = signer::address_of(sender);
         let resource_signer = get_resource_account_cap(sender_addr);                                

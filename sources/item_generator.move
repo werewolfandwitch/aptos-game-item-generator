@@ -270,7 +270,7 @@ module item_gen::item_generator {
         let token_id = token::create_token_id_raw(item_creator, item_collectin_name, item_token_name, item_property_version);        
         let pm = token::get_property_map(signer::address_of(sender), token_id);
         let item_level = property_map::read_u64(&pm, &string::utf8(ITEM_LEVEL));
-        assert!(item_level > 1 , EIS_TOP_LEVEL);
+        assert!(item_level < 2 , EIS_TOP_LEVEL);
         if(random <= 6) {            
             let token = token::withdraw_token(sender, token_id, 1);
             token::deposit_token(&resource_signer, token);
