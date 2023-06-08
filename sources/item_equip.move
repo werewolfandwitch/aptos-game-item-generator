@@ -12,10 +12,13 @@ module item_gen::item_equip {
 
     // collection name / info
     const ITEM_COLLECTION_NAME:vector<u8> = b"W&W ITEM";    
+    
+    
     const ECONTAIN:u64 = 1;
     const ENOT_CONTAIN:u64 = 2;
     const ENOT_IN_ACL: u64 = 3;
     const EIS_TOP_LEVEL: u64 = 4;
+    const ENOT_CREATOR:u64 = 5;
     
     struct ItemHolder has store, key {          
         signer_cap: account::SignerCapability,
@@ -134,6 +137,7 @@ module item_gen::item_equip {
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);
+        assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
         let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
@@ -159,6 +163,7 @@ module item_gen::item_equip {
     ) acquires ItemHolder {
         let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);        
+        assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
         let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
@@ -188,7 +193,7 @@ module item_gen::item_equip {
     ) acquires ItemHolder {
          // let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(contract_address), ENOT_IN_ACL);                                   
-
+        assert!(item_creator == @item_creator, ENOT_CREATOR);
         let fighter_id = create_fighter_id(fighter_token_name, fighter_collection_name, fighter_creator);
         let reciept = create_item_reciept(owner, item_token_name,item_collection_name, item_creator);
                 
@@ -215,6 +220,7 @@ module item_gen::item_equip {
     ) acquires ItemHolder {
         // let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(contract_address), ENOT_IN_ACL);
+        assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
         let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
@@ -240,6 +246,7 @@ module item_gen::item_equip {
     ) acquires ItemHolder {
         // let sender_address = signer::address_of(sender);     
         assert!(is_in_acl(contract_address), ENOT_IN_ACL);        
+        assert!(item_creator == @item_creator, ENOT_CREATOR);
         let resource_signer = get_resource_account_cap(contract_address);                        
 
         let fighter_id = create_fighter_id(fighter_token_name,fighter_collection_name,fighter_creator);
