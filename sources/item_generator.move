@@ -39,33 +39,43 @@ module item_gen::item_generator {
 
     // Glimmering Crystals + Ethereal Essence = Radiant Spiritstone
     // Effect: By combining the radiant crystals with the ethereal essence, you create a Spiritstone that harnesses the power of ethereal beings. This enchanted stone can be used to augment magical weapons or create ethereal armor.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/radiant_spiritstone.png
 
     // Glimmering Crystals + Celestial Dust = Radiant Celestite
     // Effect: By combining the radiant crystals with celestial dust, you create Radiant Celestite. This gemstone radiates celestial magic and can be used to imbue weapons with enhanced celestial properties or create powerful celestial-themed artifacts.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/radiant_celestite.png
 
     // Dragon Scale + Celestial Dust = Celestial Dragon Scale
     // Effect: By infusing the mighty dragon scales with celestial dust, you forge a Celestial Dragon Scale. This rare material possesses exceptional resistance to both physical and magical attacks, granting the wearer enhanced protection against elemental forces.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/celestial_dragon_scale.png
 
     // Dragon Scale + Elemental Essence (Fire) = Inferno Scale Armor
     // Effect: By infusing the mighty dragon scales with the fiery elemental essence, you forge Inferno Scale Armor. This legendary armor provides exceptional protection against fire-based attacks and grants the wearer the ability to unleash powerful flames in combat.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/inferno_scale_armor.png
 
     // Essence of the Ancients + Phoenix Feather = Phoenix's Elixir
     // Effect: By combining the ancient essence with the heat-resistant phoenix feathers, you create a potent elixir known as Phoenix's Elixir. This elixir grants temporary fire-based abilities to the user, enhancing their strength and resilience.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/phoenix_elixir.png
 
     // Moonstone Ore + Enchanted Wood = Lunar Enchanted Talisman
     // Effect: By combining the lunar-infused gemstone with enchanted wood, you craft a Lunar Enchanted Talisman. This mystical talisman enhances the wielder's magical abilities, granting them increased spellcasting prowess and the ability to channel lunar energy.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/lunar_enchanted_talisman.png
 
     // Kraken Ink + Elemental Essence (Water) = Ink of the Deep Seas
     // Effect: By blending the dark, iridescent kraken ink with water elemental essence, you create the Ink of the Deep Seas. This ink is used to inscribe protective runes or create powerful spell scrolls with water-based enchantments, providing the user with aquatic powers.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/ink_of_the_deep_seas.png
 
     // Ethereal Essence + Essence of the Ancients = Spectral Essence
     // Effect: By blending the ghostly ethereal essence with the potent Essence of the Ancients, you obtain Spectral Essence. This essence contains a combination of ethereal and ancient energies, making it a versatile substance for crafting artifacts that harness spectral powers or enhance magical abilities.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/spectral_essence.png
 
     // Phoenix Feather + Enchanted Wood = Flameheart Bow
     // Effect: By combining the heat-resistant phoenix feathers with enchanted wood, you create the Flameheart Bow. This enchanted bow channels the essence of fire, imbuing arrows with fiery properties and granting the archer enhanced precision and power in dealing with fire-aligned foes.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/flameheart_bow.png
 
     // Moonstone Ore + Kraken Ink = Tidecaller Pendant
     // Effect: By combining the lunar-infused moonstone ore with the dark, iridescent kraken ink, you craft the Tidecaller Pendant. This enchanted pendant allows the wearer to command the tides and manipulate water-based magic, granting them control over aquatic forces.
+    // https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/tidecaller_pendent.png
 
     struct Recipes has key {
         recipes: Table<String, ItemComposition>, // <Name of Item, Item Composition>
