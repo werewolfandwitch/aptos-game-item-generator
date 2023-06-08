@@ -204,7 +204,16 @@ module item_gen::item_generator {
         assert!(is_in_acl(sender_address), ENOT_IN_ACL);                           
         let resource_signer = get_resource_account_cap(minter_address);                
         let resource_account_address = signer::address_of(&resource_signer);    
-        let mutability_config = &vector<bool>[ false, true, true, true, true ];        
+        let mutability_config = &vector<bool>[ false, true, true, true, true ];
+        if(!token::check_collection_exists(resource_account_address, string::utf8(ITEM_COLLECTION_NAME))) {
+            let mutate_setting = vector<bool>[ true, true, true ]; // TODO should check before deployment.
+            let collection_uri = string::utf8(b"https://werewolfandwitch-mainnet.s3.ap-northeast-2.amazonaws.com/item-image/flameheart_bow.png");
+            token::create_collection(&resource_signer, 
+                string::utf8(ITEM_COLLECTION_NAME), 
+                string::utf8(COLLECTION_DESCRIPTION), 
+                collection_uri, 9999, mutate_setting);        
+        };
+        
         let supply_count = &mut token::get_collection_supply(resource_account_address, string::utf8(ITEM_COLLECTION_NAME));        
         let new_supply = option::extract<u64>(supply_count);                        
         let i = 0;
