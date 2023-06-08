@@ -135,6 +135,7 @@ module item_gen::item_materials {
         let resource_account_address = signer::address_of(&resource_signer);     
         let manager = borrow_global<ItemMaterialManager>(sender_address);             
         acl::assert_contains(&manager.acl,sender_address);                
+        //         let mutability_config = &vector<bool>[ false, true, true, true, true ];
         let mutability_config = &vector<bool>[ true, true, false, true, true ];        
         let token_data_id;
         let description;
@@ -200,14 +201,15 @@ module item_gen::item_materials {
     }
 
     public fun mint_item_material (
-        sender: &signer,         
+        sender: &signer,   
+        item_material_contract:address,      
         token_name: String,
     ) acquires ItemMaterialManager {             
-        let sender_address = signer::address_of(sender);
-        let resource_signer = get_resource_account_cap(sender_address);                
+        // let sender_address = signer::address_of(sender);
+        let resource_signer = get_resource_account_cap(item_material_contract);                
         let resource_account_address = signer::address_of(&resource_signer);     
-        let manager = borrow_global<ItemMaterialManager>(sender_address);             
-        acl::assert_contains(&manager.acl,sender_address);                        
+        let manager = borrow_global<ItemMaterialManager>(item_material_contract);             
+        acl::assert_contains(&manager.acl, item_material_contract);                        
         let description;
         let collection_uri;
         if(token_name == string::utf8(b"Glimmering Crystals")) {
@@ -255,7 +257,7 @@ module item_gen::item_materials {
                 description,
                 1, // 1 for NFT
                 collection_uri,
-                sender_address, // royalty fee to                
+                item_material_contract, // royalty fee to                
                 FEE_DENOMINATOR,
                 4000,
                 // we don't allow any mutation to the token
