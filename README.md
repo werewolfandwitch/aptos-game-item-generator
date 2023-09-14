@@ -1,8 +1,20 @@
 # Werewolf and witch Aptos move Item generator
-
-- Werwolf and witch [werewolfandwitch.xyz](https://werewolfandwitch.xyz/)
 - Item management and item generator by move smart contract
+- Used in Werewolf and witch NFT War game [werewolfandwitch.xyz](https://werewolfandwitch.xyz/)
+- Change the ```item_material_creator``` and ```item_creator``` in the ```Move.toml``` once you’ve initialized them with init functions
 
+## Cloning the repository
+```git clone https://github.com/werewolfandwitch/aptos-game-item-generator.git```
+Change the file path in dependencies and update the addresses
+
+## Initialize
+Initialize with ```aptos init``` in the ```aptos-game-item-generator``` folder you just cloned
+
+## Compile
+```aptos move compile --named-addresses item_gen=default```
+
+## Publish
+```aptos move publish --named-addresses item_gen=default```
 
 
 
