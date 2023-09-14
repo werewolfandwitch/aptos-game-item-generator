@@ -5,7 +5,6 @@
 
 ## Cloning the repository
 ```git clone https://github.com/werewolfandwitch/aptos-game-item-generator.git```
-Change the file path in dependencies and update the addresses
 
 ## Initialize
 Initialize with ```aptos init``` in the ```aptos-game-item-generator``` folder you just cloned
